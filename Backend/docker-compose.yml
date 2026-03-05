@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: boilerplate-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: boilerplate_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - boilerplate-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: boilerplate-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - boilerplate-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  boilerplate-network:
+    driver: bridge

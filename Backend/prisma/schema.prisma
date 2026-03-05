@@ -1,0 +1,509 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+enum PermissionAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  MANAGE
+}
+
+enum PermissionResource {
+  USER
+  ORGANIZATION
+  PAYMENT
+  AUDIT_LOG
+  FILE
+  API_KEY
+  ALL
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  PAYSTACK
+  STRIPE
+  FLUTTERWAVE
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  REGISTER
+  PASSWORD_CHANGE
+  PERMISSION_GRANTED
+  PERMISSION_REVOKED
+  PAYMENT_INITIATED
+  PAYMENT_COMPLETED
+  FILE_UPLOADED
+  FILE_DELETED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  SYSTEM
+  PAYMENT
+  USER
+  ORGANIZATION
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  avatar        String?
+  status        UserStatus @default(ACTIVE)
+  
+  emailVerified Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  emailVerificationToken String?
+  emailVerificationExpiry DateTime?
+  
+  passwordResetToken String?
+  passwordResetExpiry DateTime?
+  
+  lastLoginAt   DateTime?
+  lastLoginIp   String?
+
+  // Direct role assignment (single role per user)
+  roleId        String?
+  role          Role?     @relation("UserRole", fields: [roleId], references: [id])
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  
+  // Relations
+  refreshTokens      RefreshToken[]
+  apiKeys            ApiKey[]
+  userRoles          UserRole[]              // Legacy - for backward compatibility
+  memberships        OrganizationMember[]    // Organization-based roles (multi-tenant)
+  auditLogs          AuditLog[]
+  payments           Payment[]
+  subscriptions      Subscription[]
+  files              File[]
+  notifications      Notification[]
+  
+  @@index([email])
+  @@index([status])
+  @@index([roleId])
+  @@index([deletedAt])
+  @@index([emailVerificationToken])
+  @@index([passwordResetToken])
+  @@map("users")
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  token       String    @unique
+  userId      String
+  expiresAt   DateTime
+  isRevoked   Boolean   @default(false)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  name        String
+  key         String    @unique
+  userId      String
+  
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([key])
+  @@map("api_keys")
+}
+
+// ============================================
+// ROLES & PERMISSIONS
+// ============================================
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isSystem    Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  permissions RolePermission[]
+  userRoles   UserRole[]              // Legacy - for backward compatibility
+  users       User[]     @relation("UserRole")  // Direct user assignments
+  members     OrganizationMember[]    // Organization-based assignments
+  
+  @@map("roles")
+}
+
+model Permission {
+  id          String             @id @default(uuid())
+  action      PermissionAction
+  resource    PermissionResource
+  description String?
+  
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  
+  roles       RolePermission[]
+  
+  @@unique([action, resource])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  
+  createdAt    DateTime @default(now())
+  
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// Direct User-Role Assignment (for non-multi-tenant apps)
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String
+  roleId    String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+// ============================================
+// MULTI-TENANCY / ORGANIZATIONS
+// ============================================
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  logo        String?
+  
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  
+  members     OrganizationMember[]
+  payments    Payment[]
+  subscriptions Subscription[]
+  files       File[]
+  auditLogs   AuditLog[]
+  
+  @@index([slug])
+  @@index([deletedAt])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String           @id @default(uuid())
+  organizationId String
+  userId         String
+  roleId         String
+  role           OrganizationRole @default(MEMBER)
+  
+  invitedBy      String?
+  joinedAt       DateTime         @default(now())
+  
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleDetails    Role             @relation(fields: [roleId], references: [id])
+  
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId])
+  @@map("organization_members")
+}
+
+// ============================================
+// PAYMENTS & BILLING
+// ============================================
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  TRIALING
+  EXPIRED
+}
+
+enum SubscriptionInterval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+model Payment {
+  id             String          @id @default(uuid())
+  organizationId String?
+  userId         String
+  
+  provider       PaymentProvider
+  providerRef    String?         @unique
+  
+  amount         Decimal         @db.Decimal(10, 2)
+  currency       String          @default("NGN")
+  
+  status         PaymentStatus   @default(PENDING)
+  description    String?
+  
+  metadata       Json?
+  
+  paidAt         DateTime?
+  refundedAt     DateTime?
+  
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  
+  organization   Organization?   @relation(fields: [organizationId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([provider])
+  @@index([providerRef])
+  @@map("payments")
+}
+
+model Subscription {
+  id              String               @id @default(uuid())
+  organizationId  String?
+  userId          String
+  
+  planId          String
+  provider        PaymentProvider
+  providerRef     String?              @unique
+  
+  status          SubscriptionStatus   @default(ACTIVE)
+  interval        SubscriptionInterval @default(MONTHLY)
+  
+  amount          Decimal              @db.Decimal(10, 2)
+  currency        String               @default("NGN")
+  
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  
+  trialStart      DateTime?
+  trialEnd        DateTime?
+  
+  cancelledAt     DateTime?
+  cancelAtPeriodEnd Boolean           @default(false)
+  
+  metadata        Json?
+  
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  
+  organization    Organization?        @relation(fields: [organizationId], references: [id])
+  user            User                 @relation(fields: [userId], references: [id])
+  plan            SubscriptionPlan     @relation(fields: [planId], references: [id])
+  
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([provider])
+  @@index([providerRef])
+  @@index([planId])
+  @@map("subscriptions")
+}
+
+model SubscriptionPlan {
+  id              String               @id @default(uuid())
+  name            String
+  description     String?
+  
+  amount          Decimal              @db.Decimal(10, 2)
+  currency        String               @default("NGN")
+  interval        SubscriptionInterval @default(MONTHLY)
+  
+  trialDays       Int?
+  
+  features        Json?
+  metadata        Json?
+  
+  isActive        Boolean              @default(true)
+  
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  
+  subscriptions   Subscription[]
+  
+  @@map("subscription_plans")
+}
+
+// ============================================
+// AUDIT & COMPLIANCE
+// ============================================
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String?
+  userId         String?
+  
+  action         AuditAction
+  resource       String
+  resourceId     String?
+  
+  changes        Json?
+  metadata       Json?
+  
+  ipAddress      String?
+  userAgent      String?
+  
+  createdAt      DateTime     @default(now())
+  
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  user           User?         @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([organizationId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================
+// FILE & MEDIA HANDLING
+// ============================================
+
+model File {
+  id             String        @id @default(uuid())
+  organizationId String?
+  userId         String
+  
+  filename       String
+  originalName   String
+  mimeType       String
+  size           Int
+  
+  storageType    String        @default("local")
+  storagePath    String
+  url            String?
+  
+  isPublic       Boolean       @default(false)
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+  
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([organizationId])
+  @@index([deletedAt])
+  @@map("files")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  
+  type      NotificationType @default(INFO)
+  title     String
+  message   String
+  
+  data      Json?
+  link      String?
+  
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}

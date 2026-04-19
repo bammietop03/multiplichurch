@@ -1,8 +1,4 @@
-import {
-  PrismaClient,
-  PermissionAction,
-  PermissionResource,
-} from '@prisma/client';
+import { PrismaClient, UserRole, ChurchRole } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
@@ -14,207 +10,6 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🌱 Starting seed...');
-
-  // Create default roles
-  const roles = await Promise.all([
-    prisma.role.upsert({
-      where: { name: 'Super Admin' },
-      update: {},
-      create: {
-        name: 'Super Admin',
-        description: 'Full system access',
-        isSystem: true,
-      },
-    }),
-    prisma.role.upsert({
-      where: { name: 'Admin' },
-      update: {},
-      create: {
-        name: 'Admin',
-        description: 'Administrative access',
-        isSystem: true,
-      },
-    }),
-    prisma.role.upsert({
-      where: { name: 'User' },
-      update: {},
-      create: {
-        name: 'User',
-        description: 'Standard user access',
-        isSystem: true,
-      },
-    }),
-    // Organization-specific roles
-    prisma.role.upsert({
-      where: { name: 'Owner' },
-      update: {},
-      create: {
-        name: 'Owner',
-        description: 'Organization owner with full access',
-        isSystem: true,
-      },
-    }),
-    prisma.role.upsert({
-      where: { name: 'Member' },
-      update: {},
-      create: {
-        name: 'Member',
-        description: 'Organization member with basic access',
-        isSystem: true,
-      },
-    }),
-  ]);
-
-  console.log('✅ Created roles:', roles.map((r) => r.name).join(', '));
-
-  // Create permissions
-  const permissionData: Array<{
-    action: PermissionAction;
-    resource: PermissionResource;
-    description: string;
-  }> = [
-    {
-      action: PermissionAction.MANAGE,
-      resource: PermissionResource.ALL,
-      description: 'Full system access',
-    },
-    {
-      action: PermissionAction.CREATE,
-      resource: PermissionResource.USER,
-      description: 'Create users',
-    },
-    {
-      action: PermissionAction.READ,
-      resource: PermissionResource.USER,
-      description: 'Read users',
-    },
-    {
-      action: PermissionAction.UPDATE,
-      resource: PermissionResource.USER,
-      description: 'Update users',
-    },
-    {
-      action: PermissionAction.DELETE,
-      resource: PermissionResource.USER,
-      description: 'Delete users',
-    },
-    {
-      action: PermissionAction.CREATE,
-      resource: PermissionResource.ORGANIZATION,
-      description: 'Create organizations',
-    },
-    {
-      action: PermissionAction.READ,
-      resource: PermissionResource.ORGANIZATION,
-      description: 'Read organizations',
-    },
-    {
-      action: PermissionAction.UPDATE,
-      resource: PermissionResource.ORGANIZATION,
-      description: 'Update organizations',
-    },
-    {
-      action: PermissionAction.DELETE,
-      resource: PermissionResource.ORGANIZATION,
-      description: 'Delete organizations',
-    },
-    {
-      action: PermissionAction.READ,
-      resource: PermissionResource.PAYMENT,
-      description: 'Read payments',
-    },
-    {
-      action: PermissionAction.CREATE,
-      resource: PermissionResource.PAYMENT,
-      description: 'Create payments',
-    },
-    {
-      action: PermissionAction.READ,
-      resource: PermissionResource.AUDIT_LOG,
-      description: 'Read audit logs',
-    },
-    {
-      action: PermissionAction.CREATE,
-      resource: PermissionResource.FILE,
-      description: 'Upload files',
-    },
-    {
-      action: PermissionAction.READ,
-      resource: PermissionResource.FILE,
-      description: 'Read files',
-    },
-    {
-      action: PermissionAction.DELETE,
-      resource: PermissionResource.FILE,
-      description: 'Delete files',
-    },
-  ];
-
-  const permissions = await Promise.all(
-    permissionData.map((p) =>
-      prisma.permission.upsert({
-        where: { action_resource: { action: p.action, resource: p.resource } },
-        update: {},
-        create: p,
-      }),
-    ),
-  );
-
-  console.log('✅ Created permissions:', permissions.length);
-
-  // Assign all permissions to Super Admin
-  const superAdminRole = roles.find((r) => r.name === 'Super Admin');
-  if (superAdminRole) {
-    await Promise.all(
-      permissions.map((permission) =>
-        prisma.rolePermission.upsert({
-          where: {
-            roleId_permissionId: {
-              roleId: superAdminRole.id,
-              permissionId: permission.id,
-            },
-          },
-          update: {},
-          create: {
-            roleId: superAdminRole.id,
-            permissionId: permission.id,
-          },
-        }),
-      ),
-    );
-    console.log('✅ Assigned all permissions to Super Admin');
-  }
-
-  // Assign basic permissions to User role
-  const userRole = roles.find((r) => r.name === 'User');
-  if (userRole) {
-    const userPermissions = permissions.filter(
-      (p) =>
-        (p.resource === 'USER' && p.action === 'READ') ||
-        (p.resource === 'ORGANIZATION' && p.action === 'READ') ||
-        (p.resource === 'FILE' && ['CREATE', 'READ'].includes(p.action)) ||
-        (p.resource === 'PAYMENT' && ['CREATE', 'READ'].includes(p.action)),
-    );
-
-    await Promise.all(
-      userPermissions.map((permission) =>
-        prisma.rolePermission.upsert({
-          where: {
-            roleId_permissionId: {
-              roleId: userRole.id,
-              permissionId: permission.id,
-            },
-          },
-          update: {},
-          create: {
-            roleId: userRole.id,
-            permissionId: permission.id,
-          },
-        }),
-      ),
-    );
-    console.log('✅ Assigned basic permissions to User role');
-  }
 
   // Create default super admin user
   const superAdminEmail = process.env.SUPER_ADMIN_EMAIL || 'admin@example.com';
@@ -231,7 +26,7 @@ async function main() {
       lastName: 'Admin',
       emailVerified: true,
       emailVerifiedAt: new Date(),
-      roleId: superAdminRole?.id,
+      userRole: UserRole.SUPER_ADMIN,
     },
   });
 
@@ -239,6 +34,71 @@ async function main() {
   console.log('📧 Email:', superAdminEmail);
   console.log('🔑 Password:', superAdminPassword);
   console.log('⚠️  Please change the password after first login!');
+
+  // Create a church
+  const church = await prisma.church.upsert({
+    where: { slug: 'grace-community-church' },
+    update: {},
+    create: {
+      name: 'Grace Community Church',
+      slug: 'grace-community-church',
+      description: 'A welcoming community of faith',
+      isActive: true,
+    },
+  });
+  console.log('✅ Created church:', church.name);
+
+  // Church admin member
+  const adminHash = await bcrypt.hash('Admin@123', 10);
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'churchadmin@example.com' },
+    update: {},
+    create: {
+      email: 'churchadmin@example.com',
+      passwordHash: adminHash,
+      firstName: 'Church',
+      lastName: 'Admin',
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      userRole: UserRole.USER,
+    },
+  });
+  await prisma.churchMember.upsert({
+    where: { churchId_userId: { churchId: church.id, userId: adminUser.id } },
+    update: {},
+    create: {
+      churchId: church.id,
+      userId: adminUser.id,
+      role: ChurchRole.ADMIN,
+    },
+  });
+  console.log('✅ Church admin: churchadmin@example.com / Admin@123');
+
+  // Regular member
+  const memberHash = await bcrypt.hash('Member@123', 10);
+  const memberUser = await prisma.user.upsert({
+    where: { email: 'member@example.com' },
+    update: {},
+    create: {
+      email: 'member@example.com',
+      passwordHash: memberHash,
+      firstName: 'John',
+      lastName: 'Member',
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      userRole: UserRole.USER,
+    },
+  });
+  await prisma.churchMember.upsert({
+    where: { churchId_userId: { churchId: church.id, userId: memberUser.id } },
+    update: {},
+    create: {
+      churchId: church.id,
+      userId: memberUser.id,
+      role: ChurchRole.MEMBER,
+    },
+  });
+  console.log('✅ Member: member@example.com / Member@123');
 
   console.log('🎉 Seed completed successfully!');
 }

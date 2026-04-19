@@ -9,15 +9,13 @@ import { CacheModule } from './core/cache/cache.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailModule } from './core/mail/mail.module';
 import { WebSocketModule } from './core/websocket/websocket.module';
-import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { ChurchesModule } from './modules/churches/churches.module';
 import { UsersModule } from './modules/users/users.module';
-import { PaymentsModule } from './modules/payments/payments.module';
 import { AuditModule } from './core/audit/audit.module';
 import { HealthModule } from './core/health/health.module';
 import { QueueModule } from './core/queue/queue.module';
 import { StorageModule } from './core/storage/storage.module';
 import { FilesModule } from './modules/files/files.module';
-import { RolesModule } from './modules/roles/roles.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import appConfig from './config/app.config';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
@@ -46,15 +44,13 @@ import { Reflector } from '@nestjs/core';
     MailModule,
     WebSocketModule,
     AuthModule,
-    OrganizationsModule,
+    ChurchesModule,
     UsersModule,
-    PaymentsModule,
     AuditModule,
     HealthModule,
     QueueModule,
     StorageModule,
     FilesModule,
-    RolesModule,
     NotificationsModule,
   ],
   controllers: [AppController],

@@ -55,29 +55,4 @@ export class PrismaService
     await this.$disconnect();
     await this.pool.end();
   }
-
-  /**
-   * Enable soft delete for models that have deletedAt field
-   * Prisma 7: Use query extensions instead of middleware
-   *
-   * Example implementation via model extensions:
-   *
-   * return prisma.$extends({
-   *   model: {
-   *     user: {
-   *       async softDelete(id: string) {
-   *         return prisma.user.update({
-   *           where: { id },
-   *           data: { deletedAt: new Date() },
-   *         });
-   *       },
-   *     },
-   *   },
-   * });
-   */
-
-  /**
-   * Exclude soft-deleted records from queries
-   * Prisma 7: Use computed fields or explicit where conditions
-   */
 }

@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AppConfig } from './config/app.config';
@@ -40,13 +40,13 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors({
     // origin: appConfig.corsOrigin?.split(',').map((o) => o.trim()) || '*',
-    origin: 'http://localhost:5174',
+    origin: 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
       'Authorization',
-      'x-organization-id',
+      'x-church-id',
       'x-correlation-id',
     ],
   });

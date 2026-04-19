@@ -18,25 +18,26 @@ export class TenantInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
 
-    // Get organizationId from header, query, or body
-    const organizationId =
-      request.headers['x-organization-id'] ||
-      request.query.organizationId ||
-      request.body?.organizationId;
+    // Get churchId from header, query, body, or route params (e.g. /churches/:id/*)
+    const churchId =
+      request.headers['x-church-id'] ||
+      request.query.churchId ||
+      request.body?.churchId ||
+      request.params?.id;
 
-    if (organizationId) {
-      // Validate that the organization exists
-      const organization = await this.prisma.organization.findUnique({
-        where: { id: organizationId },
+    if (churchId) {
+      // Validate that the church exists
+      const church = await this.prisma.church.findUnique({
+        where: { id: churchId },
       });
 
-      if (!organization) {
-        throw new BadRequestException('Organization not found');
+      if (!church) {
+        throw new BadRequestException('Church not found');
       }
 
-      // Attach organizationId and organization to request
-      request.organizationId = organizationId;
-      request.organization = organization;
+      // Attach churchId and church to request
+      request.churchId = churchId;
+      request.church = church;
     }
 
     return next.handle();

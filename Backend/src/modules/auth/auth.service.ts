@@ -20,7 +20,7 @@ import {
   VerifyEmailDto,
   ChangePasswordDto,
 } from './dto';
-import { User, UserStatus } from '@prisma/client';
+import { UserStatus } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -45,12 +45,7 @@ export class AuthService {
     // Hash password
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
-    // Get default "User" role for simple app mode
-    const defaultRole = await this.prisma.role.findFirst({
-      where: { name: 'User' },
-    });
-
-    // Create user with default role assignment
+    // Create user (userRole defaults to USER)
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
@@ -58,8 +53,6 @@ export class AuthService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         status: UserStatus.ACTIVE,
-        // Assign default role directly
-        roleId: defaultRole?.id,
       },
       select: {
         id: true,
@@ -137,7 +130,7 @@ export class AuthService {
       },
     });
 
-    // Fetch user with role and organizations
+    // Fetch user with churches
     const userWithDetails = await this.prisma.user.findUnique({
       where: { id: user.id },
       select: {
@@ -147,23 +140,17 @@ export class AuthService {
         lastName: true,
         avatar: true,
         status: true,
+        userRole: true,
         emailVerified: true,
         createdAt: true,
         updatedAt: true,
         lastLoginAt: true,
-        role: {
-          select: {
-            id: true,
-            name: true,
-            description: true,
-          },
-        },
         memberships: {
           select: {
             id: true,
-            organizationId: true,
+            churchId: true,
             role: true,
-            organization: {
+            church: {
               select: {
                 id: true,
                 name: true,
@@ -186,8 +173,8 @@ export class AuthService {
     return {
       user: {
         ...userWithDetails,
-        organizations: userWithDetails?.memberships.map((m) => ({
-          ...m.organization,
+        churches: userWithDetails?.memberships.map((m) => ({
+          ...m.church,
           membershipId: m.id,
           role: m.role,
         })),
@@ -235,7 +222,7 @@ export class AuthService {
       // Store new refresh token
       await this.storeRefreshToken(storedToken.user.id, tokens.refreshToken);
 
-      // Fetch user with roles and organizations
+      // Fetch user with churches
       const userWithDetails = await this.prisma.user.findUnique({
         where: { id: storedToken.user.id },
         select: {
@@ -245,23 +232,17 @@ export class AuthService {
           lastName: true,
           avatar: true,
           status: true,
+          userRole: true,
           emailVerified: true,
           createdAt: true,
           updatedAt: true,
           lastLoginAt: true,
-          role: {
-            select: {
-              id: true,
-              name: true,
-              description: true,
-            },
-          },
           memberships: {
             select: {
               id: true,
-              organizationId: true,
+              churchId: true,
               role: true,
-              organization: {
+              church: {
                 select: {
                   id: true,
                   name: true,
@@ -278,8 +259,8 @@ export class AuthService {
       return {
         user: {
           ...userWithDetails,
-          organizations: userWithDetails?.memberships.map((m) => ({
-            ...m.organization,
+          churches: userWithDetails?.memberships.map((m) => ({
+            ...m.church,
             membershipId: m.id,
             role: m.role,
           })),
@@ -359,23 +340,17 @@ export class AuthService {
         lastName: true,
         avatar: true,
         status: true,
+        userRole: true,
         emailVerified: true,
         createdAt: true,
         updatedAt: true,
         lastLoginAt: true,
-        role: {
-          select: {
-            id: true,
-            name: true,
-            description: true,
-          },
-        },
         memberships: {
           select: {
             id: true,
-            organizationId: true,
+            churchId: true,
             role: true,
-            organization: {
+            church: {
               select: {
                 id: true,
                 name: true,
@@ -393,11 +368,10 @@ export class AuthService {
       return null;
     }
 
-    // Transform to expected format
     return {
       ...user,
-      organizations: user.memberships.map((m) => ({
-        ...m.organization,
+      churches: user.memberships.map((m) => ({
+        ...m.church,
         membershipId: m.id,
         role: m.role,
       })),
@@ -448,23 +422,18 @@ export class AuthService {
         lastName: true,
         avatar: true,
         status: true,
+        userRole: true,
         emailVerified: true,
         emailVerifiedAt: true,
         createdAt: true,
         updatedAt: true,
         lastLoginAt: true,
-        role: {
-          select: {
-            id: true,
-            name: true,
-            description: true,
-          },
-        },
         memberships: {
           select: {
-            organizationId: true,
+            id: true,
+            churchId: true,
             role: true,
-            organization: {
+            church: {
               select: {
                 id: true,
                 name: true,

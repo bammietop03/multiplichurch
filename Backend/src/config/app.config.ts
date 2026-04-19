@@ -106,21 +106,6 @@ export default registerAs('app', (): AppConfig => {
     // Email (Resend)
     resendApiKey: process.env.RESEND_API_KEY,
     resendFromEmail: process.env.RESEND_FROM_EMAIL,
-
-    // Paystack
-    paystackSecretKey: process.env.PAYSTACK_SECRET_KEY,
-    paystackPublicKey: process.env.PAYSTACK_PUBLIC_KEY,
-    paystackWebhookSecret: process.env.PAYSTACK_WEBHOOK_SECRET,
-
-    // Stripe
-    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
-
-    // Flutterwave
-    flutterwaveSecretKey: process.env.FLUTTERWAVE_SECRET_KEY,
-    flutterwavePublicKey: process.env.FLUTTERWAVE_PUBLIC_KEY,
-    flutterwaveEncryptionKey: process.env.FLUTTERWAVE_ENCRYPTION_KEY,
-    flutterwaveWebhookSecret: process.env.FLUTTERWAVE_WEBHOOK_SECRET,
   };
 
   const result = configSchema.safeParse(config);

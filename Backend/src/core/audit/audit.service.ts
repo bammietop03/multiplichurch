@@ -7,7 +7,7 @@ export interface AuditLogPayload {
   resource: string;
   resourceId?: string;
   userId?: string;
-  organizationId?: string;
+  churchId?: string;
   changes?: Record<string, any>;
   metadata?: Record<string, any>;
   ipAddress?: string;
@@ -34,7 +34,7 @@ export class AuditService {
           resource: payload.resource,
           resourceId: payload.resourceId,
           userId: payload.userId,
-          organizationId: payload.organizationId,
+          churchId: payload.churchId,
           changes: payload.changes
             ? JSON.parse(JSON.stringify(payload.changes))
             : null,
@@ -59,7 +59,7 @@ export class AuditService {
       action?: AuditAction;
       resource?: string;
       userId?: string;
-      organizationId?: string;
+      churchId?: string;
       startDate?: Date;
       endDate?: Date;
     },
@@ -70,7 +70,7 @@ export class AuditService {
         action: filters.action,
         resource: filters.resource,
         userId: filters.userId,
-        organizationId: filters.organizationId,
+        churchId: filters.churchId,
         createdAt: {
           gte: filters.startDate,
           lte: filters.endDate,
@@ -88,7 +88,7 @@ export class AuditService {
             lastName: true,
           },
         },
-        organization: {
+        church: {
           select: {
             id: true,
             name: true,
@@ -106,7 +106,7 @@ export class AuditService {
     action?: AuditAction;
     resource?: string;
     userId?: string;
-    organizationId?: string;
+    churchId?: string;
     startDate?: Date;
     endDate?: Date;
   }): Promise<number> {
@@ -115,7 +115,7 @@ export class AuditService {
         action: filters.action,
         resource: filters.resource,
         userId: filters.userId,
-        organizationId: filters.organizationId,
+        churchId: filters.churchId,
         createdAt: {
           gte: filters.startDate,
           lte: filters.endDate,

@@ -17,11 +17,8 @@ export function setupSwagger(app: INestApplication) {
     .addSecurityRequirements('bearer')
     .addTag('Authentication', 'Authentication endpoints')
     .addTag('Users', 'User management endpoints')
-    .addTag('Organizations', 'Organization management endpoints')
-    .addTag('Payments', 'Payment processing endpoints')
     .addTag('Files', 'File upload and download endpoints')
     .addTag('Health', 'Service health check endpoints')
-    .addTag('Audit', 'Audit logging endpoints')
     .addTag('Notifications', 'User notification endpoints')
     .build();
 

@@ -6,6 +6,8 @@ import {
   PASSWORD_RESET_EMAIL,
   PASSWORD_CHANGED_EMAIL,
   WELCOME_EMAIL,
+  CHURCH_INVITE_EMAIL,
+  CHURCH_WELCOME_CREDENTIALS_EMAIL,
 } from './templates';
 
 @Injectable()
@@ -64,7 +66,7 @@ export class MailService {
   }
 
   async sendPasswordReset(email: string, name: string, token: string) {
-    const url = `${this.configService.get('app.frontendUrl')}/auth/reset-password?token=${token}`;
+    const url = `${this.configService.get('app.frontendUrl')}/reset-password?token=${token}`;
 
     const html = this.replaceVariables(PASSWORD_RESET_EMAIL, { name, url });
 
@@ -91,6 +93,50 @@ export class MailService {
     await this.send({
       to: email,
       subject: 'Welcome to our platform!',
+      html,
+    });
+  }
+
+  async sendChurchInvite(
+    email: string,
+    churchName: string,
+    token: string,
+    role: string,
+  ) {
+    const url = `${this.configService.get('app.frontendUrl')}/invite?token=${token}`;
+    const html = this.replaceVariables(CHURCH_INVITE_EMAIL, {
+      churchName,
+      role,
+      url,
+    });
+
+    await this.send({
+      to: email,
+      subject: `You've been invited to join ${churchName}`,
+      html,
+    });
+  }
+
+  async sendWelcomeWithCredentials(
+    email: string,
+    name: string,
+    password: string,
+    churchName: string,
+    role: string,
+  ) {
+    const loginUrl = `${this.configService.get('app.frontendUrl')}/login`;
+    const html = this.replaceVariables(CHURCH_WELCOME_CREDENTIALS_EMAIL, {
+      name,
+      email,
+      password,
+      churchName,
+      role,
+      loginUrl,
+    });
+
+    await this.send({
+      to: email,
+      subject: `You've been added to ${churchName} on MultipliChurch`,
       html,
     });
   }

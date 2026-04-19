@@ -20,7 +20,8 @@ import { UsersService } from './users.service';
 import { UpdateProfileDto, UpdatePasswordDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { EmailVerifiedGuard } from '../../common/guards';
-import { CurrentUser } from '../../common/decorators';
+import { CurrentUser, Roles } from '../../common/decorators';
+import { RolesGuard } from '../../common/guards';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -93,15 +94,28 @@ export class UsersController {
     return this.usersService.deleteAccount(user.id);
   }
 
-  @Get('me/organizations')
-  @ApiOperation({ summary: 'Get user organizations' })
+  @Get('me/churches')
+  @ApiOperation({ summary: 'Get user churches' })
   @ApiResponse({
     status: 200,
-    description: 'Organizations retrieved successfully',
+    description: 'Churches retrieved successfully',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getOrganizations(@CurrentUser() user: any) {
-    return this.usersService.getOrganizations(user.id);
+  getChurches(@CurrentUser() user: any) {
+    return this.usersService.getChurches(user.id);
+  }
+
+  @Get('admin/stats')
+  @UseGuards(RolesGuard)
+  @Roles('SUPER_ADMIN')
+  @ApiOperation({ summary: 'Get admin stats' })
+  @ApiResponse({
+    status: 200,
+    description: 'Admin stats retrieved successfully',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  getAdminStats() {
+    return this.usersService.getAdminStats();
   }
 
   @Get('me/activity')

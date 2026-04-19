@@ -23,22 +23,16 @@ export class UsersService {
         avatar: true,
         emailVerified: true,
         status: true,
+        userRole: true,
         createdAt: true,
         updatedAt: true,
         lastLoginAt: true,
-        role: {
-          select: {
-            id: true,
-            name: true,
-            description: true,
-          },
-        },
         memberships: {
           select: {
             id: true,
-            organizationId: true,
+            churchId: true,
             role: true,
-            organization: {
+            church: {
               select: {
                 id: true,
                 name: true,
@@ -58,8 +52,8 @@ export class UsersService {
 
     return {
       ...user,
-      organizations: user.memberships.map((m) => ({
-        ...m.organization,
+      churches: user.memberships.map((m) => ({
+        ...m.church,
         membershipId: m.id,
         role: m.role,
       })),
@@ -206,21 +200,12 @@ export class UsersService {
       include: {
         memberships: {
           include: {
-            organization: true,
-            roleDetails: true,
+            church: true,
           },
         },
         refreshTokens: {
           select: {
             createdAt: true,
-            expiresAt: true,
-          },
-        },
-        apiKeys: {
-          select: {
-            name: true,
-            createdAt: true,
-            lastUsedAt: true,
             expiresAt: true,
           },
         },
@@ -275,8 +260,8 @@ export class UsersService {
       where: { userId },
     });
 
-    // Remove from organizations
-    await this.prisma.organizationMember.deleteMany({
+    // Remove from churches
+    await this.prisma.churchMember.deleteMany({
       where: { userId },
     });
 
@@ -295,17 +280,16 @@ export class UsersService {
     };
   }
 
-  async getOrganizations(userId: string) {
-    const memberships = await this.prisma.organizationMember.findMany({
+  async getChurches(userId: string) {
+    const memberships = await this.prisma.churchMember.findMany({
       where: {
         userId,
-        organization: {
+        church: {
           deletedAt: null,
         },
       },
       include: {
-        organization: true,
-        roleDetails: true,
+        church: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -313,6 +297,20 @@ export class UsersService {
     });
 
     return memberships;
+  }
+
+  async getAdminStats() {
+    const [totalUsers, totalChurches, totalMembers, verifiedUsers] =
+      await this.prisma.$transaction([
+        this.prisma.user.count({ where: { deletedAt: null } }),
+        this.prisma.church.count({ where: { deletedAt: null } }),
+        this.prisma.churchMember.count(),
+        this.prisma.user.count({
+          where: { deletedAt: null, emailVerified: true },
+        }),
+      ]);
+
+    return { totalUsers, totalChurches, totalMembers, verifiedUsers };
   }
 
   async getActivity(userId: string, limit: number = 50) {

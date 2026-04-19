@@ -5,15 +5,16 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorators/roles.decorator';
-import { PrismaService } from '../../core/database/prisma.service';
+import {
+  ROLES_KEY,
+  SKIP_CHURCH_CHECK_KEY,
+} from '../decorators/roles.decorator';
 import { RolePermissionCacheService } from '../../core/cache/role-permission-cache.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private prisma: PrismaService,
     private cacheService: RolePermissionCacheService,
   ) {}
 
@@ -34,65 +35,48 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
-    // Get organizationId from request (set by TenantInterceptor) - OPTIONAL
-    const organizationId = request.organizationId;
+    // If the handler is decorated with @SkipChurchCheck(), go straight to
+    // global role check (used by admin routes that have a :id param but
+    // intentionally skip TenantInterceptor).
+    const skipChurchCheck = this.reflector.getAllAndOverride<boolean>(
+      SKIP_CHURCH_CHECK_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
-    // MODE 1: Multi-tenant (organization-based roles)
-    if (organizationId) {
-      // Use cache service
-      const cachedMemberRole =
-        await this.cacheService.getOrganizationMemberRole(
-          user.sub,
-          organizationId,
-        );
+    const churchId = skipChurchCheck
+      ? null
+      : request.churchId ||
+        request.headers['x-church-id'] ||
+        request.params?.id;
 
-      if (!cachedMemberRole.isMember) {
-        throw new ForbiddenException(
-          'User is not a member of this organization',
-        );
-      }
-
-      const hasRole = requiredRoles.some(
-        (role) => cachedMemberRole.role === role,
+    // MODE 1: Church-scoped roles
+    if (churchId) {
+      const cached = await this.cacheService.getChurchMemberRole(
+        user.id,
+        churchId,
       );
 
-      if (!hasRole) {
+      if (!cached.isMember) {
+        throw new ForbiddenException('User is not a member of this church');
+      }
+
+      if (!requiredRoles.includes(cached.role)) {
         throw new ForbiddenException(
-          `User does not have required role in this organization. Required: ${requiredRoles.join(', ')}`,
+          `Insufficient church role. Required: ${requiredRoles.join(' or ')}`,
         );
       }
 
-      // Optionally fetch full membership details if needed by the controller
-      const membership = await this.prisma.organizationMember.findFirst({
-        where: {
-          userId: user.sub,
-          organizationId: organizationId,
-        },
-        include: {
-          roleDetails: true,
-        },
-      });
-
-      request.membership = membership;
       return true;
     }
 
-    // MODE 2: Simple app (direct user roles)
-    // Use cache service
-    const cachedUserRoles = await this.cacheService.getUserRoles(user.sub);
-
-    if (cachedUserRoles.roleNames.length === 0) {
-      throw new ForbiddenException('User has no assigned roles');
+    // MODE 2: Global user role (SUPER_ADMIN / USER)
+    if (!user.userRole) {
+      throw new ForbiddenException('User has no assigned role');
     }
 
-    const hasRole = requiredRoles.some((requiredRole) =>
-      cachedUserRoles.roleNames.includes(requiredRole),
-    );
-
-    if (!hasRole) {
-      const userRoleNames = cachedUserRoles.roleNames.join(', ');
+    if (!requiredRoles.includes(user.userRole)) {
       throw new ForbiddenException(
-        `User does not have required role. Required: ${requiredRoles.join(', ')}, Has: ${userRoleNames}`,
+        `Insufficient role. Required: ${requiredRoles.join(' or ')}`,
       );
     }
 

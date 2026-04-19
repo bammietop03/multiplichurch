@@ -40,9 +40,13 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login.mutateAsync(data);
+      const result = await login.mutateAsync(data);
       toast.success("Welcome back!");
-      navigate(redirect || "/dashboard");
+      if (result.user.userRole === "SUPER_ADMIN") {
+        navigate(redirect || "/admin");
+      } else {
+        navigate(redirect || "/dashboard");
+      }
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message || "Invalid email or password",

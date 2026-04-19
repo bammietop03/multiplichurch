@@ -126,7 +126,8 @@ export default function RegisterPage() {
 
           {registerMutation.isError && (
             <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg">
-              {(registerMutation.error as Error)?.message ||
+              {(registerMutation.error as any)?.response?.data?.message ||
+                (registerMutation.error as Error)?.message ||
                 "Registration failed. Please try again."}
             </div>
           )}

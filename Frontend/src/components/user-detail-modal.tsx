@@ -108,17 +108,8 @@ export function UserDetailModal({
             </div>
             <div className="flex flex-col gap-2">
               <Badge variant={statusVariant}>{user.status || "ACTIVE"}</Badge>
-              <Badge
-                variant={
-                  user.roles?.some(
-                    (r) =>
-                      r.role?.name === "ADMIN" || r.role?.name === "SUPER_ADMIN"
-                  )
-                    ? "default"
-                    : "secondary"
-                }
-              >
-                {(user.roles?.[0]?.role?.name as string) || "USER"}
+              <Badge variant="default">
+                {(user.userRole as string) || "USER"}
               </Badge>
             </div>
           </div>
@@ -150,7 +141,7 @@ export function UserDetailModal({
                   <div>
                     <p className="text-sm font-medium">Role</p>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      {(user.roles?.[0]?.role?.name as string) || "USER"}
+                      {(user.userRole as string) || "USER"}
                     </p>
                   </div>
                 </div>
@@ -258,7 +249,7 @@ export function UserDetailModal({
                     className="flex items-center justify-between p-4 rounded-lg border"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                      <div className="h-10 w-10 rounded-lg bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center">
                         <Building2 className="h-5 w-5 text-white" />
                       </div>
                       <div>

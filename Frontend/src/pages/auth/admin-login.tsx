@@ -42,9 +42,6 @@ export default function AdminLoginPage() {
     try {
       const result = await login.mutateAsync(data);
 
-      console.log("Login result:", result);
-      console.log("User role:", result.user?.userRole);
-
       // Check if user has admin role
       const userRole = result.user?.userRole;
       const hasAdminRole = userRole === "SUPER_ADMIN";
@@ -69,7 +66,7 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-primary px-4">
       {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[length:24px_24px]"></div>
+      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-size-[24px_24px]"></div>
 
       <div className="relative w-full max-w-md">
         {/* Back to home link */}

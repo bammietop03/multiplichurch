@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Lock dark mode to class-based only. Since applyTheme always sets .light on <html>,
+   dark: utilities will never activate regardless of the OS theme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

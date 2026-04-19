@@ -100,7 +100,7 @@ export default function MembersPage() {
   const handleRemove = async () => {
     if (!removingMember) return;
     try {
-      await removeMember.mutateAsync(removingMember.userId);
+      await removeMember.mutateAsync(removingMember.id);
       toast.success("Member removed");
       setRemovingMember(null);
     } catch {

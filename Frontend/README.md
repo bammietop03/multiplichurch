@@ -1,73 +1,132 @@
-# React + TypeScript + Vite
+# MultipliChurch — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React SPA for the MultipliChurch platform. Provides a dashboard for church members and admins, a super-admin panel, and all authentication flows.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Framework**: React 19 + TypeScript
+- **Build Tool**: Vite 7
+- **Routing**: React Router v7
+- **State**: Zustand
+- **Data Fetching**: TanStack Query v5
+- **UI**: Radix UI primitives + Tailwind CSS v4
+- **Forms**: React Hook Form + Zod
+- **Charts**: Recharts
+- **Real-time**: Socket.io Client
+- **Notifications**: Sonner (toast)
 
-## React Compiler
+## Project Structure
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── pages/
+│   ├── auth/           # Login, Register, Forgot/Reset Password, Verify Email
+│   ├── dashboard/      # Overview, Churches, Members, Profile, Settings
+│   ├── admin/          # Super-admin overview and church management
+│   ├── home.tsx        # Public landing page
+│   └── invite-accept.tsx
+├── components/
+│   ├── ui/             # Base UI components (Button, Dialog, Table, etc.)
+│   ├── navigation/     # Sidebar and top nav
+│   ├── activity-timeline.tsx
+│   ├── add-member-dialog.tsx
+│   ├── avatar-upload.tsx
+│   ├── confirm-dialog.tsx
+│   ├── notification-dropdown.tsx
+│   ├── onboarding-dialog.tsx
+│   └── user-detail-modal.tsx
+├── hooks/              # React Query hooks (use-auth, use-churches, use-users, etc.)
+├── stores/             # Zustand stores (auth-store, notification-store, ui-store)
+├── layouts/            # DashboardLayout, AdminLayout
+├── lib/
+│   ├── api-client.ts   # Axios instance with interceptors
+│   └── utils.ts
+└── types/              # Shared TypeScript types
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Setup
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js v18+
+- Backend running on `http://localhost:3000` (see [Backend README](../Backend/README.md))
+
+### 1. Install dependencies
+
+```bash
+npm install
 ```
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+```env
+# Full API URL with version path (used for REST calls)
+VITE_API_URL=http://localhost:3000/api/v1
+
+# Base URL without version (used for WebSocket connection)
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+### 3. Start development server
+
+```bash
+npm run dev   # http://localhost:5173
+```
+
+## Available Scripts
+
+| Script            | Description                                   |
+| ----------------- | --------------------------------------------- |
+| `npm run dev`     | Start Vite dev server with HMR                |
+| `npm run build`   | Type-check and build for production (`dist/`) |
+| `npm run preview` | Preview the production build locally          |
+| `npm run lint`    | Run ESLint                                    |
+
+## Pages & Routes
+
+| Route                   | Page               | Access        |
+| ----------------------- | ------------------ | ------------- |
+| `/`                     | Home (landing)     | Public        |
+| `/auth/login`           | Login              | Public        |
+| `/auth/register`        | Register           | Public        |
+| `/auth/forgot-password` | Forgot Password    | Public        |
+| `/auth/reset-password`  | Reset Password     | Public        |
+| `/auth/verify-email`    | Email Verification | Public        |
+| `/dashboard`            | Overview           | Authenticated |
+| `/dashboard/churches`   | My Churches        | Authenticated |
+| `/dashboard/members`    | Church Members     | Church Admin  |
+| `/dashboard/profile`    | User Profile       | Authenticated |
+| `/dashboard/settings`   | Settings           | Authenticated |
+| `/invite/:token`        | Accept Invitation  | Public        |
+| `/admin`                | Admin Overview     | Super Admin   |
+| `/admin/churches`       | All Churches       | Super Admin   |
+| `/admin/login`          | Admin Login        | Public        |
+
+## State Management
+
+| Store                | Responsibility                                  |
+| -------------------- | ----------------------------------------------- |
+| `auth-store`         | Current user, token state, login/logout actions |
+| `notification-store` | Real-time notifications list and unread count   |
+| `ui-store`           | Theme (light/dark) and sidebar collapse state   |
+
+## API Client
+
+`lib/api-client.ts` exports a configured Axios instance that:
+
+- Sets the `Authorization: Bearer <token>` header automatically
+- Attaches `x-church-id` from the active church context
+- Refreshes the access token on 401 responses and retries the original request
+- Redirects to `/auth/login` on unrecoverable auth failures
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+Output is written to `dist/`. Serve the `dist/` directory with any static file server or CDN. All routes must fall back to `index.html` for client-side routing to work.

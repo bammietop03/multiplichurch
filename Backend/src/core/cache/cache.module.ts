@@ -11,12 +11,15 @@ import { RolePermissionCacheService } from './role-permission-cache.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
+        const redisUrl = configService.get<string>('REDIS_URL');
         const redisHost = configService.get<string>('REDIS_HOST', 'localhost');
         const redisPort = configService.get<number>('REDIS_PORT', 6379);
         const cacheTtl = configService.get<number>('CACHE_TTL', 900); // 15 minutes default
 
+        const connectionUrl = redisUrl || `redis://${redisHost}:${redisPort}`;
+
         return {
-          stores: [new Keyv(`redis://${redisHost}:${redisPort}`)],
+          stores: [new Keyv(connectionUrl)],
           ttl: cacheTtl * 1000, // Convert to milliseconds
         };
       },

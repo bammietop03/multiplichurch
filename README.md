@@ -1,102 +1,197 @@
-# Full-Stack SaaS Boilerplate
+# MultipliChurch
 
-A production-ready full-stack boilerplate built with modern technologies for rapid SaaS application development. This boilerplate includes authentication, authorization, payments, notifications, file management, and more.
+A full-stack church management platform built for multi-church organizations. MultipliChurch enables churches to manage their members, track activity, handle file storage, send notifications, and administrate multiple congregations from a single platform.
 
-## 🚀 Tech Stack
+## Architecture
+
+```
+MultipliChurch/
+├── Backend/    # NestJS REST API
+└── Frontend/   # React SPA
+```
+
+## Tech Stack
 
 ### Backend
 
-- **Framework**: NestJS (Node.js)
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: JWT with Passport
-- **API Documentation**: Swagger/OpenAPI
-- **Background Jobs**: Bull (Redis-based queue)
-- **Caching**: Redis with cache-manager
-- **File Storage**: Cloudflare R2
-- **WebSockets**: Socket.io
-- **Email**: Resend
-- **Validation**: class-validator
-- **Security**: Helmet, CORS, Throttling
+| Concern         | Technology                               |
+| --------------- | ---------------------------------------- |
+| Framework       | NestJS 11 (Node.js)                      |
+| Database        | PostgreSQL 16 + Prisma ORM               |
+| Authentication  | JWT (access + refresh tokens) + Passport |
+| Caching         | Redis + cache-manager                    |
+| Background Jobs | Bull (Redis-based queues)                |
+| File Storage    | Local filesystem or Cloudflare R2        |
+| Real-time       | Socket.io WebSockets                     |
+| Email           | Resend                                   |
+| API Docs        | Swagger / OpenAPI                        |
+| Payments        | Stripe, Paystack, Flutterwave            |
 
 ### Frontend
 
-- **Framework**: React 19
-- **Build Tool**: Vite
-- **Routing**: React Router v7
-- **State Management**: Zustand
-- **Data Fetching**: TanStack Query (React Query)
-- **UI Components**: Radix UI + Tailwind CSS
-- **Forms**: React Hook Form + Zod
-- **Charts**: Recharts
-- **Icons**: Lucide React
-- **Real-time**: Socket.io Client
+| Concern       | Technology                 |
+| ------------- | -------------------------- |
+| Framework     | React 19 + TypeScript      |
+| Build Tool    | Vite                       |
+| Routing       | React Router v7            |
+| State         | Zustand                    |
+| Data Fetching | TanStack Query v5          |
+| UI            | Radix UI + Tailwind CSS v4 |
+| Forms         | React Hook Form + Zod      |
+| Charts        | Recharts                   |
+| Real-time     | Socket.io Client           |
 
-## ✨ Features
+## Features
 
-### Authentication & Authorization
+### Authentication & Security
 
-- ✅ User registration and login
-- ✅ JWT-based authentication
-- ✅ Email verification
-- ✅ Password reset/recovery
-- ✅ Role-based access control (RBAC)
-- ✅ Protected routes
+- JWT-based auth with HTTP-only cookies (access + refresh tokens)
+- Email verification flow
+- Password reset / recovery
+- Rate limiting on all auth endpoints
+- Helmet secure headers, CORS, CSRF protection
+- Input validation with whitelist stripping
+
+### Church Management (Multi-tenant)
+
+- Create and manage multiple churches
+- Church-scoped roles: `ADMIN` and `MEMBER`
+- Invite members via email with token-based acceptance
+- Direct add members (admin only)
+- Soft-delete and audit trail per church
 
 ### User Management
 
-- ✅ User CRUD operations
-- ✅ User profiles
-- ✅ Avatar uploads
-- ✅ Activity timeline
-- ✅ User roles and permissions
+- User profiles with avatar upload
+- Activity timeline
+- Platform roles: `SUPER_ADMIN` and `USER`
+- Account status management (active / inactive / suspended)
 
-### Organizations
+### Admin Panel
 
-- ✅ Multi-tenancy support
-- ✅ Organization management
-- ✅ Team collaboration features
-
-### Payments
-
-- ✅ Subscription management
-- ✅ Payment processing integration
-- ✅ Billing history
+- Super admin dashboard
+- Platform-wide church and user oversight
 
 ### Notifications
 
-- ✅ Real-time notifications (WebSocket)
-- ✅ Notification center
-- ✅ Push notifications
-- ✅ Email notifications
+- Real-time notifications via WebSocket
+- Notification center with read/unread state
+- Email notifications via Resend
 
 ### File Management
 
-- ✅ File upload/download
-- ✅ Cloudflare R2 storage integration
-- ✅ Drag-and-drop file uploads
-- ✅ Avatar upload with preview
+- File uploads with local or Cloudflare R2 storage
+- Avatar upload with preview
+- Church-scoped file storage
 
 ### Developer Experience
 
-- ✅ API documentation with Swagger
-- ✅ Database migrations
-- ✅ Database seeding
-- ✅ Docker support (development & production)
-- ✅ Health checks
-- ✅ Audit logging
-- ✅ Error handling
-- ✅ Request validation
-- ✅ TypeScript throughout
+- Swagger UI at `/api/docs`
+- Database migrations with Prisma
+- Database seeding with a default super admin
+- Docker Compose for local development (Postgres + Redis)
+- Production Docker Compose
+- Health check endpoint
+- Audit logging for all key actions
+- Structured JSON logging with Pino
 
-## 📋 Prerequisites
+## Prerequisites
 
-Before you begin, ensure you have the following installed:
+- **Node.js** v18+
+- **npm** v9+
+- **Docker** (recommended — runs Postgres and Redis automatically)
 
-- **Node.js**: v18+ (LTS recommended)
-- **npm**: v9+ or **yarn** or **pnpm**
-- **PostgreSQL**: v14+ (or use Docker)
-- **Redis**: v6+ (or use Docker)
-- **Docker** (optional, for containerized development)
+## Quick Start
+
+### 1. Clone and install
+
+```bash
+# Install backend dependencies
+cd Backend
+npm install
+
+# Install frontend dependencies
+cd ../Frontend
+npm install
+```
+
+### 2. Configure environment
+
+```bash
+# Backend
+cd Backend
+cp .env.example .env
+# Edit .env — set DATABASE_URL, JWT secrets, RESEND_API_KEY, etc.
+
+# Frontend
+cd ../Frontend
+cp .env.example .env
+# Edit .env — set VITE_API_URL
+```
+
+### 3. Start infrastructure
+
+```bash
+cd Backend
+npm run docker:up   # starts Postgres and Redis containers
+```
+
+### 4. Run database migrations and seed
+
+```bash
+cd Backend
+npm run prisma:migrate
+npm run prisma:seed   # creates the default super admin
+```
+
+### 5. Start development servers
+
+```bash
+# Terminal 1 — backend (http://localhost:3000)
+cd Backend
+npm run start:dev
+
+# Terminal 2 — frontend (http://localhost:5173)
+cd Frontend
+npm run dev
+```
+
+The API documentation is available at **http://localhost:3000/api/docs**.
+
+## Default Credentials (after seed)
+
+| Role        | Email               | Password    |
+| ----------- | ------------------- | ----------- |
+| Super Admin | `admin@example.com` | `Admin@123` |
+
+> Change these immediately in your `.env` before deploying.
+
+## Project Structure
+
+```
+Backend/
+├── src/
+│   ├── modules/         # Feature modules (auth, churches, users, files, notifications)
+│   ├── core/            # Infrastructure (database, cache, mail, queue, storage, websocket, audit, health)
+│   ├── common/          # Shared decorators, guards, interceptors, filters
+│   └── config/          # App and Swagger configuration
+├── prisma/
+│   ├── schema.prisma
+│   ├── seed.ts
+│   └── migrations/
+└── docker-compose.yml
+
+Frontend/
+├── src/
+│   ├── pages/           # Route pages (auth, dashboard, admin)
+│   ├── components/      # Shared UI components
+│   ├── hooks/           # React Query hooks
+│   ├── stores/          # Zustand stores (auth, notifications, UI)
+│   ├── layouts/         # Dashboard and admin layouts
+│   ├── lib/             # API client and utilities
+│   └── types/           # TypeScript types
+└── vite.config.ts
+```
 
 ## 🛠️ Installation
 

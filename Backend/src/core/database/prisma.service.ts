@@ -25,7 +25,12 @@ export class PrismaService
     private auditMiddleware: AuditMiddleware,
   ) {
     const databaseUrl = configService.get<string>('app.databaseUrl');
-    const pool = new Pool({ connectionString: databaseUrl });
+    const pool = new Pool({
+      connectionString: databaseUrl,
+      ssl: databaseUrl?.includes('localhost')
+        ? false
+        : { rejectUnauthorized: false },
+    });
     const adapter = new PrismaPg(pool);
 
     super({

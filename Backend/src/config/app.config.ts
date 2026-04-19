@@ -1,12 +1,13 @@
 import { registerAs } from '@nestjs/config';
 import { z } from 'zod';
+import { fr } from 'zod/v4/locales';
 
 const configSchema = z.object({
   // Application
   nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
   port: z.coerce.number().default(3000),
   apiVersion: z.string().default('v1'),
-  frontendUrl: z.string().url().default('http://localhost:5173'),
+  frontendUrl: z.string().url(),
 
   // Database
   databaseUrl: z.string().url(),
@@ -70,6 +71,7 @@ export default registerAs('app', (): AppConfig => {
     port: process.env.PORT,
     apiVersion: process.env.API_VERSION,
 
+    frontendUrl: process.env.FRONTEND_URL,
     // Database
     databaseUrl: process.env.DATABASE_URL,
 

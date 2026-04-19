@@ -40,7 +40,7 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors({
     // origin: appConfig.corsOrigin?.split(',').map((o) => o.trim()) || '*',
-    origin: ['http://localhost:5173', 'https://multiplichurch.netlify.app'],
+    origin: ['http://localhost:5173', 'https://multiplichurch.netlify.app', 'https://multiplichurch-three.vercel.app/'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [

@@ -6,9 +6,7 @@ import { useChangePassword } from "@/hooks/use-auth";
 import {
   useDeactivateAccount,
   useDeleteAccount,
-  useExportUserData,
 } from "@/hooks/use-users";
-import { useUIStore } from "@/stores/ui-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,10 +30,6 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import {
   CheckCircle,
-  Moon,
-  Sun,
-  Monitor,
-  Download,
   AlertTriangle,
 } from "lucide-react";
 
@@ -59,11 +53,9 @@ const passwordSchema = z
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useUIStore();
   const changePassword = useChangePassword();
   const deactivateAccount = useDeactivateAccount();
   const deleteAccount = useDeleteAccount();
-  const exportData = useExportUserData();
 
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -92,20 +84,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleExportData = async () => {
-    try {
-      const data = await exportData.mutateAsync();
-      const blob = new Blob([data], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "my-data-export.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      // Error handled by mutation
-    }
-  };
 
   const handleDeactivate = async () => {
     await deactivateAccount.mutateAsync();
@@ -117,12 +95,6 @@ export default function SettingsPage() {
     setDeleteDialogOpen(false);
   };
 
-  const themes = [
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark", label: "Dark", icon: Moon },
-    { value: "system", label: "System", icon: Monitor },
-  ] as const;
-
   return (
     <div className="space-y-6">
       <div>
@@ -131,34 +103,6 @@ export default function SettingsPage() {
           Manage your account settings and preferences
         </p>
       </div>
-
-      {/* Appearance */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Appearance</CardTitle>
-          <CardDescription>
-            Customize how the application looks on your device
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4 max-w-md">
-            {themes.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                onClick={() => setTheme(value)}
-                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors ${
-                  theme === value
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <Icon className="h-6 w-6" />
-                <span className="text-sm font-medium">{label}</span>
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Change Password */}
       <Card>
@@ -240,35 +184,6 @@ export default function SettingsPage() {
               )}
             </Button>
           </form>
-        </CardContent>
-      </Card>
-
-      {/* Data Export */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Export Your Data</CardTitle>
-          <CardDescription>
-            Download a copy of all your data (GDPR compliance)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            variant="outline"
-            onClick={handleExportData}
-            disabled={exportData.isPending}
-          >
-            {exportData.isPending ? (
-              <>
-                <Spinner size="sm" className="mr-2" />
-                Preparing...
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" />
-                Export data
-              </>
-            )}
-          </Button>
         </CardContent>
       </Card>
 

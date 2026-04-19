@@ -30,15 +30,13 @@ import UnauthorizedPage from "@/pages/403";
 const DashboardOverview = lazy(() => import("@/pages/dashboard/overview"));
 const ProfilePage = lazy(() => import("@/pages/dashboard/profile"));
 const SettingsPage = lazy(() => import("@/pages/dashboard/settings"));
-const OrganizationsPage = lazy(() => import("@/pages/dashboard/organizations"));
-const PaymentsPage = lazy(() => import("@/pages/dashboard/payments"));
-const FilesPage = lazy(() => import("@/pages/dashboard/files"));
+const ChurchesPage = lazy(() => import("@/pages/dashboard/churches"));
+const MembersPage = lazy(() => import("@/pages/dashboard/members"));
 
 // Admin Pages - Lazy load (code split)
 const AdminOverview = lazy(() => import("@/pages/admin/overview"));
-const AdminUsersPage = lazy(() => import("@/pages/admin/users"));
-const AuditLogsPage = lazy(() => import("@/pages/admin/audit-logs"));
-const RolesPage = lazy(() => import("@/pages/admin/roles"));
+const AdminChurchesPage = lazy(() => import("@/pages/admin/churches"));
+const InviteAcceptPage = lazy(() => import("@/pages/invite-accept"));
 
 // Loading fallback component
 function PageLoader() {
@@ -209,26 +207,18 @@ function App() {
             }
           />
           <Route
-            path="organizations"
+            path="churches"
             element={
               <Suspense fallback={<PageLoader />}>
-                <OrganizationsPage />
+                <ChurchesPage />
               </Suspense>
             }
           />
           <Route
-            path="payments"
+            path="members"
             element={
               <Suspense fallback={<PageLoader />}>
-                <PaymentsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="files"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <FilesPage />
+                <MembersPage />
               </Suspense>
             }
           />
@@ -252,30 +242,24 @@ function App() {
             }
           />
           <Route
-            path="users"
+            path="churches"
             element={
               <Suspense fallback={<PageLoader />}>
-                <AdminUsersPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="audit-logs"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <AuditLogsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="roles"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <RolesPage />
+                <AdminChurchesPage />
               </Suspense>
             }
           />
         </Route>
+
+        {/* Invite Accept Route */}
+        <Route
+          path="/invite"
+          element={
+            <Suspense fallback={<FullPageLoader />}>
+              <InviteAcceptPage />
+            </Suspense>
+          }
+        />
 
         {/* Error Pages */}
         <Route path="/403" element={<UnauthorizedPage />} />

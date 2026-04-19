@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useAdminStats } from "@/hooks/use-admin";
 import {
   Card,
@@ -7,14 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Users,
-  Building2,
-  CreditCard,
-  TrendingUp,
-  UserPlus,
-  DollarSign,
-} from "lucide-react";
+import { Users, Building2, UserCheck, UsersRound } from "lucide-react";
 
 export default function AdminOverview() {
   const { data: stats, isLoading } = useAdminStats();
@@ -22,56 +16,27 @@ export default function AdminOverview() {
   const statCards = [
     {
       title: "Total Users",
-      value: stats?.totalUsers || 0,
+      value: stats?.totalUsers ?? "—",
       icon: Users,
       description: "All registered users",
-      trend: "+12%",
-      trendUp: true,
     },
     {
-      title: "Active Users",
-      value: stats?.activeUsers || 0,
-      icon: TrendingUp,
-      description: "Users active this month",
-      trend: "+8%",
-      trendUp: true,
+      title: "Verified Users",
+      value: stats?.verifiedUsers ?? "—",
+      icon: UserCheck,
+      description: "Email-verified accounts",
     },
     {
-      title: "Organizations",
-      value: stats?.totalOrganizations || 0,
+      title: "Total Churches",
+      value: stats?.totalChurches ?? "—",
       icon: Building2,
-      description: "Total organizations",
-      trend: "+5%",
-      trendUp: true,
+      description: "Active church communities",
     },
     {
-      title: "Total Payments",
-      value: stats?.totalPayments || 0,
-      icon: CreditCard,
-      description: "All-time transactions",
-      trend: "+23%",
-      trendUp: true,
-    },
-    {
-      title: "Recent Signups",
-      value: stats?.recentSignups || 0,
-      icon: UserPlus,
-      description: "Last 7 days",
-      trend: "-3%",
-      trendUp: false,
-    },
-    {
-      title: "Revenue",
-      value: stats?.revenue
-        ? new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: stats.revenue.currency,
-          }).format(stats.revenue.total)
-        : "$0",
-      icon: DollarSign,
-      description: "All-time revenue",
-      trend: "+18%",
-      trendUp: true,
+      title: "Total Members",
+      value: stats?.totalMembers ?? "—",
+      icon: UsersRound,
+      description: "Church memberships across all churches",
     },
   ];
 
@@ -88,12 +53,12 @@ export default function AdminOverview() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Overview of your platform's performance and metrics
+          Platform overview for MultipliChurch
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -104,18 +69,9 @@ export default function AdminOverview() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-                <span
-                  className={`text-xs font-medium ${
-                    stat.trendUp ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  {stat.trend}
-                </span>
-              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {stat.description}
+              </p>
             </CardContent>
           </Card>
         ))}
@@ -129,79 +85,42 @@ export default function AdminOverview() {
             <CardDescription>Common administrative tasks</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-2">
-            <a
-              href="/admin/users"
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
-            >
-              <Users className="h-5 w-5 text-primary" />
-              <div>
-                <p className="font-medium">Manage Users</p>
-                <p className="text-sm text-muted-foreground">
-                  View and edit user accounts
-                </p>
-              </div>
-            </a>
-            <a
-              href="/admin/organizations"
+            <Link
+              to="/admin/churches"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
             >
               <Building2 className="h-5 w-5 text-primary" />
               <div>
-                <p className="font-medium">Manage Organizations</p>
+                <p className="font-medium">Manage Churches</p>
                 <p className="text-sm text-muted-foreground">
-                  View all organizations
+                  View and manage church communities
                 </p>
               </div>
-            </a>
-            <a
-              href="/admin/audit-logs"
+            </Link>
+            <Link
+              to="/dashboard"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
             >
-              <TrendingUp className="h-5 w-5 text-primary" />
+              <Users className="h-5 w-5 text-primary" />
               <div>
-                <p className="font-medium">View Audit Logs</p>
+                <p className="font-medium">User Dashboard</p>
                 <p className="text-sm text-muted-foreground">
-                  Track all system activities
+                  Switch to the user dashboard
                 </p>
               </div>
-            </a>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>System Health</CardTitle>
-            <CardDescription>Current system status</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">API Server</span>
-              <span className="flex items-center gap-2 text-sm">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                Operational
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Database</span>
-              <span className="flex items-center gap-2 text-sm">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                Operational
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">File Storage</span>
-              <span className="flex items-center gap-2 text-sm">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                Operational
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Email Service</span>
-              <span className="flex items-center gap-2 text-sm">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                Operational
-              </span>
-            </div>
+            </Link>
+            <Link
+              to="/dashboard/settings"
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+            >
+              <UsersRound className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-medium">Settings</p>
+                <p className="text-sm text-muted-foreground">
+                  Configure platform settings
+                </p>
+              </div>
+            </Link>
           </CardContent>
         </Card>
       </div>

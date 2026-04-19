@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/stores/auth-store";
+import { useNotificationStore } from "@/stores/notification-store";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
@@ -15,19 +16,19 @@ export const apiClient = axios.create({
 // Request interceptor - add auth token and organization header
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const { accessToken, activeOrganizationId } = useAuthStore.getState();
+    const { accessToken, activeChurchId } = useAuthStore.getState();
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    if (activeOrganizationId) {
-      config.headers["x-organization-id"] = activeOrganizationId;
+    if (activeChurchId) {
+      config.headers["x-church-id"] = activeChurchId;
     }
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor - handle token refresh
@@ -82,7 +83,7 @@ apiClient.interceptors.response.use(
       const response = await axios.post(
         `${API_BASE_URL}/auth/refresh`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       // Response is wrapped: { success, data: { accessToken, user } }
@@ -92,6 +93,11 @@ apiClient.interceptors.response.use(
       if (user) {
         authStore.setUser(user);
       }
+
+      // Reconnect WebSocket with the new token
+      const notificationStore = useNotificationStore.getState();
+      notificationStore.disconnectWebSocket();
+      notificationStore.connectWebSocket();
 
       processQueue(null);
       return apiClient(originalRequest);
@@ -107,7 +113,7 @@ apiClient.interceptors.response.use(
     } finally {
       isRefreshing = false;
     }
-  }
+  },
 );
 
 export default apiClient;

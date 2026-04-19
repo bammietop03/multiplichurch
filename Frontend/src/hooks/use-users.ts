@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth-store";
-import type { User, Organization, AuditLog, PaginatedResponse } from "@/types";
+import type { User, AuditLog, PaginatedResponse } from "@/types";
 
 // Query keys
 export const userKeys = {
   all: ["users"] as const,
   profile: () => [...userKeys.all, "profile"] as const,
-  organizations: () => [...userKeys.all, "organizations"] as const,
+  churches: () => [...userKeys.all, "churches"] as const,
   activity: (page?: number) => [...userKeys.all, "activity", page] as const,
 };
 
@@ -16,8 +16,8 @@ export function useProfile() {
   return useQuery({
     queryKey: userKeys.profile(),
     queryFn: async () => {
-      const { data } = await apiClient.get<User>("/users/me");
-      return data;
+      const { data } = await apiClient.get("/users/me");
+      return data.data as User;
     },
   });
 }
@@ -25,34 +25,34 @@ export function useProfile() {
 // Update profile mutation
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
-  const { setUser } = useAuthStore();
 
   return useMutation({
     mutationFn: async (
-      updates: Partial<Pick<User, "firstName" | "lastName" | "avatar">>
+      updates: Partial<Pick<User, "firstName" | "lastName" | "avatar">>,
     ) => {
-      const { data } = await apiClient.patch<User>("/users/me", updates);
-      return data;
+      const { data } = await apiClient.patch("/users/me", updates);
+      return data.data as User;
     },
     onSuccess: (data) => {
-      setUser(data);
+      // Merge updated fields into existing user without wiping userChurches
+      useAuthStore.setState((state) => ({
+        user: state.user ? { ...state.user, ...data } : data,
+      }));
       queryClient.setQueryData(userKeys.profile(), data);
     },
   });
 }
 
-// Get user organizations
-export function useUserOrganizations() {
-  const { setUserOrganizations } = useAuthStore();
+// Get user churches
+export function useUserChurches() {
+  const { setUserChurches } = useAuthStore();
 
   return useQuery({
-    queryKey: userKeys.organizations(),
+    queryKey: userKeys.churches(),
     queryFn: async () => {
-      const { data } = await apiClient.get<Organization[]>(
-        "/users/me/organizations"
-      );
-      setUserOrganizations(data);
-      return data;
+      const { data } = await apiClient.get("/users/me/churches");
+      setUserChurches(data.data);
+      return data.data;
     },
   });
 }
@@ -62,13 +62,10 @@ export function useUserActivity(page = 1, limit = 20) {
   return useQuery({
     queryKey: userKeys.activity(page),
     queryFn: async () => {
-      const { data } = await apiClient.get<PaginatedResponse<AuditLog>>(
-        "/users/me/activity",
-        {
-          params: { page, limit },
-        }
-      );
-      return data;
+      const { data } = await apiClient.get("/users/me/activity", {
+        params: { page, limit },
+      });
+      return data.data as PaginatedResponse<AuditLog>;
     },
   });
 }

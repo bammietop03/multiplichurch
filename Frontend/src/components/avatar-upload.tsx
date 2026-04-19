@@ -51,14 +51,14 @@ export function AvatarUpload({
       try {
         await onUpload(file);
         toast.success("Avatar updated successfully");
-      } catch (error) {
+      } catch {
         toast.error("Failed to upload avatar");
         setPreview(null);
       } finally {
         setIsUploading(false);
       }
     },
-    [onUpload]
+    [onUpload],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -108,7 +108,7 @@ export function AvatarUpload({
           isDragActive
             ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
             : "border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600",
-          isUploading && "opacity-50 pointer-events-none"
+          isUploading && "opacity-50 pointer-events-none",
         )}
       >
         <input {...getInputProps()} />

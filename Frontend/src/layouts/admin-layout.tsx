@@ -15,26 +15,19 @@ import {
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Users,
-  Activity,
   LogOut,
   Menu,
   X,
   ChevronLeft,
-  ArrowLeft,
   Settings,
-  Moon,
-  Sun,
-  Shield,
+  Building2,
 } from "lucide-react";
 import { UserMenu } from "@/components/navigation";
 import { NotificationDropdown } from "@/components/notification-dropdown";
 
 const adminNavItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/roles", label: "Roles & Permissions", icon: Shield },
-  { href: "/admin/audit-logs", label: "Audit Logs", icon: Activity },
+  { href: "/admin/churches", label: "Churches", icon: Building2 },
 ];
 
 export default function AdminLayout() {
@@ -46,8 +39,6 @@ export default function AdminLayout() {
     setSidebarOpen,
     sidebarCollapsed,
     toggleSidebarCollapsed,
-    theme,
-    setTheme,
   } = useUIStore();
   const logout = useLogout();
 
@@ -86,9 +77,11 @@ export default function AdminLayout() {
           <div className="flex items-center justify-between h-16 px-4 border-b">
             {!sidebarCollapsed && (
               <div className="flex items-center gap-2">
-                <span className="font-bold text-lg">Admin</span>
-                <span className="px-1.5 py-0.5 text-xs font-medium bg-primary/10 text-primary rounded">
-                  Panel
+                <span className="font-bold text-lg text-white">
+                  MultipliChurch
+                </span>
+                <span className="px-1.5 py-0.5 text-xs font-medium bg-white/20 text-white rounded">
+                  Admin
                 </span>
               </div>
             )}
@@ -115,20 +108,6 @@ export default function AdminLayout() {
             </Button>
           </div>
 
-          {/* Back to Dashboard */}
-          <div className="p-2">
-            <Link
-              to="/dashboard"
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-sidebar-accent/50 transition-colors",
-                sidebarCollapsed && "justify-center",
-              )}
-            >
-              <ArrowLeft className="h-5 w-5 shrink-0" />
-              {!sidebarCollapsed && <span>Back to Dashboard</span>}
-            </Link>
-          </div>
-
           {/* Navigation */}
           <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
             {adminNavItems.map((item) => (
@@ -136,10 +115,10 @@ export default function AdminLayout() {
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                  "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150 font-medium",
                   location.pathname === item.href
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50",
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-white/80 hover:bg-white/15 hover:text-white",
                 )}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
@@ -154,7 +133,7 @@ export default function AdminLayout() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    "flex items-center gap-3 w-full p-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors",
+                    "flex items-center gap-3 w-full p-2 rounded-lg hover:bg-white/15 transition-all duration-150",
                     sidebarCollapsed && "justify-center",
                   )}
                 >
@@ -164,12 +143,10 @@ export default function AdminLayout() {
                   </Avatar>
                   {!sidebarCollapsed && (
                     <div className="flex-1 text-left min-w-0">
-                      <p className="text-sm font-medium truncate">
+                      <p className="text-sm font-medium truncate text-white">
                         {user?.firstName || user?.email}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        Admin
-                      </p>
+                      <p className="text-xs text-white/70 truncate">Admin</p>
                     </div>
                   )}
                 </button>
@@ -183,16 +160,7 @@ export default function AdminLayout() {
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                >
-                  {theme === "dark" ? (
-                    <Sun className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Moon className="mr-2 h-4 w-4" />
-                  )}
-                  Toggle theme
-                </DropdownMenuItem>
+
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}

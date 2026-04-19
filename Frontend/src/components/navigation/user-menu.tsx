@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { User, Settings, LogOut, Moon, Sun } from "lucide-react";
+import { User, Settings, LogOut } from "lucide-react";
 import { useAuthStore } from "@/stores/auth-store";
-import { useUIStore } from "@/stores/ui-store";
 import { useLogout } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,20 +15,15 @@ import { toast } from "sonner";
 
 export function UserMenu() {
   const { user } = useAuthStore();
-  const { theme, setTheme } = useUIStore();
   const logout = useLogout();
 
   const handleLogout = async () => {
     try {
       await logout.mutateAsync();
       toast.success("Logged out successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to logout");
     }
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const getInitials = (name: string) => {
@@ -45,7 +39,7 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+        <button className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-neutral-100 transition-colors">
           <Avatar className="h-8 w-8">
             <AvatarImage
               src={user.avatar}
@@ -79,20 +73,6 @@ export function UserMenu() {
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
-          {theme === "dark" ? (
-            <>
-              <Sun className="mr-2 h-4 w-4" />
-              Light Mode
-            </>
-          ) : (
-            <>
-              <Moon className="mr-2 h-4 w-4" />
-              Dark Mode
-            </>
-          )}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

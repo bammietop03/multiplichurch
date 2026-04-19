@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,15 +6,8 @@ import { useRegister } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { Building2, Check } from "lucide-react";
 
 const registerSchema = z
   .object({
@@ -40,8 +33,17 @@ const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+const benefits = [
+  "Free to use — no credit card needed",
+  "Set up your church in under 5 minutes",
+  "Invite members with secure email links",
+  "Admin and member role management",
+];
+
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect");
   const registerMutation = useRegister();
 
   const {
@@ -57,37 +59,86 @@ export default function RegisterPage() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...registerData } = data;
       await registerMutation.mutateAsync(registerData);
-      navigate(`/verify-email?email=${encodeURIComponent(registerData.email)}`);
+      const verifyUrl = `/verify-email?email=${encodeURIComponent(registerData.email)}${redirect ? `&redirect=${encodeURIComponent(redirect)}` : ""}`;
+      navigate(verifyUrl);
     } catch {
-      // Error is handled by mutation
+      // Error handled by mutation
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Create an account
-          </CardTitle>
-          <CardDescription className="text-center">
-            Enter your details below to create your account
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
-            {registerMutation.isError && (
-              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
-                {(registerMutation.error as Error)?.message ||
-                  "Registration failed. Please try again."}
-              </div>
-            )}
+    <div className="min-h-screen flex">
+      {/* Left panel — brand */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-primary p-12 text-white">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <Building2 className="h-5 w-5 text-white" />
+          </div>
+          <span className="font-bold text-xl">MultipliChurch</span>
+        </Link>
+
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-3xl font-bold leading-tight mb-3">
+              Start managing your church today
+            </h2>
+            <p className="text-white/75 text-lg leading-relaxed">
+              Create your free account and get your church community set up in
+              minutes.
+            </p>
+          </div>
+          <ul className="space-y-4">
+            {benefits.map((benefit) => (
+              <li key={benefit} className="flex items-center gap-3">
+                <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                  <Check className="h-3.5 w-3.5 text-white" />
+                </div>
+                <span className="text-white/90 text-sm">{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="text-white/50 text-sm">
+          © {new Date().getFullYear()} MultipliChurch. All rights reserved.
+        </p>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white overflow-y-auto">
+        <div className="w-full max-w-md space-y-7">
+          {/* Mobile logo */}
+          <Link to="/" className="flex lg:hidden items-center gap-2.5 mb-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-bold text-lg">MultipliChurch</span>
+          </Link>
+
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Create your account
+            </h1>
+            <p className="text-muted-foreground mt-1.5">
+              Free to use — no credit card required
+            </p>
+          </div>
+
+          {registerMutation.isError && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg">
+              {(registerMutation.error as Error)?.message ||
+                "Registration failed. Please try again."}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="firstName">First name</Label>
                 <Input
                   id="firstName"
                   placeholder="John"
+                  className="h-11"
                   {...register("firstName")}
                 />
                 {errors.firstName && (
@@ -96,11 +147,12 @@ export default function RegisterPage() {
                   </p>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="lastName">Last name</Label>
                 <Input
                   id="lastName"
                   placeholder="Doe"
+                  className="h-11"
                   {...register("lastName")}
                 />
                 {errors.lastName && (
@@ -110,13 +162,15 @@ export default function RegisterPage() {
                 )}
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email address</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="name@example.com"
                 autoComplete="email"
+                className="h-11"
                 {...register("email")}
               />
               {errors.email && (
@@ -125,12 +179,14 @@ export default function RegisterPage() {
                 </p>
               )}
             </div>
-            <div className="space-y-2">
+
+            <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 autoComplete="new-password"
+                className="h-11"
                 {...register("password")}
               />
               {errors.password && (
@@ -139,12 +195,14 @@ export default function RegisterPage() {
                 </p>
               )}
             </div>
-            <div className="space-y-2">
+
+            <div className="space-y-1.5">
               <Label htmlFor="confirmPassword">Confirm password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 autoComplete="new-password"
+                className="h-11"
                 {...register("confirmPassword")}
               />
               {errors.confirmPassword && (
@@ -153,11 +211,10 @@ export default function RegisterPage() {
                 </p>
               )}
             </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
+
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-11 text-base"
               disabled={registerMutation.isPending}
             >
               {registerMutation.isPending ? (
@@ -169,15 +226,19 @@ export default function RegisterPage() {
                 "Create account"
               )}
             </Button>
-            <p className="text-sm text-center text-muted-foreground">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+          </form>
+
+          <p className="text-sm text-center text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-primary hover:underline font-medium"
+            >
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,342 +1,385 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Shield,
-  Zap,
+  Building2,
   Users,
-  CreditCard,
-  Lock,
-  Cloud,
-  ArrowRight,
+  Shield,
+  Bell,
+  ChevronRight,
   Check,
+  Mail,
+  Lock,
 } from "lucide-react";
 
 const features = [
   {
-    icon: Shield,
-    title: "Enterprise Security",
+    icon: Building2,
+    title: "Church Profiles",
     description:
-      "Built-in authentication, authorization, and security best practices out of the box.",
+      "Set up your church profile with a name, custom slug, and description. Everything in one organised place.",
   },
   {
     icon: Users,
-    title: "Multi-Tenant Ready",
+    title: "Member Management",
     description:
-      "Organizations and teams support with flexible role-based access control.",
+      "Invite members by email with secure token links. View and manage your entire congregation with ease.",
   },
   {
-    icon: CreditCard,
-    title: "Payment Integration",
+    icon: Shield,
+    title: "Role-Based Access",
     description:
-      "Pre-integrated with Stripe, Paystack, and Flutterwave for global payments.",
+      "Assign Admin or Member roles to control what each person can see and do within your church.",
+  },
+  {
+    icon: Bell,
+    title: "Real-Time Notifications",
+    description:
+      "Stay informed with instant in-app notifications for membership changes and church announcements.",
+  },
+  {
+    icon: Mail,
+    title: "Email Invitations",
+    description:
+      "Send branded invite emails to new members. They join your church with a single secure click.",
   },
   {
     icon: Lock,
-    title: "JWT Authentication",
+    title: "Secure & Private",
     description:
-      "Secure token-based authentication with refresh tokens and session management.",
-  },
-  {
-    icon: Cloud,
-    title: "File Storage",
-    description:
-      "Local and S3-compatible cloud storage for all your file management needs.",
-  },
-  {
-    icon: Zap,
-    title: "Production Ready",
-    description:
-      "Docker support, health checks, and comprehensive logging for production deployments.",
+      "Enterprise-grade security with JWT authentication, email verification, and HTTP-only cookies.",
   },
 ];
 
-const pricingPlans = [
+const steps = [
   {
-    name: "Starter",
-    price: "Free",
-    description: "Perfect for side projects and learning",
-    features: [
-      "Up to 3 team members",
-      "Basic authentication",
-      "1GB file storage",
-      "Community support",
-    ],
+    number: "01",
+    title: "Create an Account",
+    description: "Sign up in seconds — no credit card, no commitment.",
   },
   {
-    name: "Pro",
-    price: "$29",
-    period: "/month",
-    description: "For growing teams and businesses",
-    features: [
-      "Unlimited team members",
-      "Advanced authentication",
-      "50GB file storage",
-      "Priority support",
-      "Custom domains",
-      "API access",
-    ],
-    highlighted: true,
+    number: "02",
+    title: "Set Up Your Church",
+    description:
+      "Add your church name, a unique slug, and an optional description.",
   },
   {
-    name: "Enterprise",
-    price: "Custom",
-    description: "For large organizations with custom needs",
-    features: [
-      "Everything in Pro",
-      "Unlimited storage",
-      "SSO integration",
-      "Dedicated support",
-      "SLA guarantee",
-      "Custom integrations",
-    ],
+    number: "03",
+    title: "Invite Your Community",
+    description:
+      "Send email invites to members and assign them the right roles instantly.",
   },
+];
+
+const stats = [
+  { value: "Free", label: "To get started" },
+  { value: "Secure", label: "JWT + HTTP-only cookies" },
+  { value: "Fast", label: "Real-time WebSocket updates" },
+  { value: "Simple", label: "Up and running in minutes" },
 ];
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold">
-            Boilerplate
+    <div className="min-h-screen bg-white text-foreground">
+      {/* Navbar */}
+      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-bold text-lg">MultipliChurch</span>
           </Link>
-          <div className="flex items-center gap-4">
-            <Link to="/login">
-              <Button variant="ghost">Sign in</Button>
-            </Link>
-            <Link to="/register">
-              <Button>Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="py-20 md:py-32">
-        <div className="container mx-auto px-4 text-center">
-          <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
-            🚀 Production-Ready Boilerplate
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-            Build your next SaaS
-            <br />
-            <span className="text-primary">10x faster</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            A production-ready full-stack boilerplate with authentication,
-            payments, organizations, and more. Stop rebuilding the basics and
-            focus on what makes your product unique.
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            <Link to="/register">
-              <Button size="lg" className="gap-2">
-                Start Building <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
             <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#features"
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Button size="lg" variant="outline">
-                View on GitHub
-              </Button>
+              Features
             </a>
+            <a
+              href="#how-it-works"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              How it works
+            </a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <Link to="/login">
+              <Button variant="ghost" size="sm">
+                Sign In
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button size="sm" className="gap-1.5">
+                Get Started
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Features Section */}
-      <section className="py-20 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              Everything you need to build
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              All the essential features for modern SaaS applications, ready to
-              use out of the box.
-            </p>
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-linear-to-b from-accent/40 to-white">
+        <div className="max-w-7xl mx-auto px-6 py-28 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            Free to use — no credit card required
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature) => (
-              <Card key={feature.title} className="border-0 shadow-sm">
-                <CardHeader>
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                    <feature.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Choose the plan that fits your needs. Upgrade or downgrade at any
-              time.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {pricingPlans.map((plan) => (
-              <Card
-                key={plan.name}
-                className={`relative ${
-                  plan.highlighted
-                    ? "border-primary shadow-lg scale-105"
-                    : "border-border"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                    <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-                <CardHeader className="text-center pb-2">
-                  <CardTitle className="text-lg">{plan.name}</CardTitle>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    {plan.period && (
-                      <span className="text-muted-foreground">
-                        {plan.period}
-                      </span>
-                    )}
-                  </div>
-                  <CardDescription className="mt-2">
-                    {plan.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <ul className="space-y-3">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link to="/register" className="block mt-6">
-                    <Button
-                      className="w-full"
-                      variant={plan.highlighted ? "default" : "outline"}
-                    >
-                      Get Started
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
-          <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
-            Join thousands of developers who are building their next big thing
-            with our boilerplate.
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]">
+            Church management
+            <br />
+            <span className="text-primary">made simple</span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+            MultipliChurch gives church leaders the tools to manage members,
+            send secure email invites, and grow their community — all in one
+            place.
           </p>
-          <Link to="/register">
-            <Button size="lg" variant="secondary" className="gap-2">
-              Create your account <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/register">
+              <Button size="lg" className="h-12 px-8 text-base gap-2">
+                Start for free
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/login">
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 px-8 text-base"
+              >
+                Sign in
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats bar */}
+      <section className="border-y">
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {stats.map((stat) => (
+              <div key={stat.label}>
+                <div className="text-2xl font-extrabold text-primary mb-1">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Everything your church needs
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              Purpose-built for church leaders who want clarity, control, and
+              community.
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="group p-7 rounded-2xl border bg-white hover:shadow-lg hover:border-primary/25 transition-all duration-200"
+              >
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors">
+                  <feature.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="py-24 bg-accent/20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Get started in 3 steps
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Up and running in minutes, not hours.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-3">
+            {steps.map((step, i) => (
+              <div key={step.number} className="relative text-center">
+                <div className="inline-flex h-16 w-16 rounded-2xl bg-primary text-white text-xl font-bold items-center justify-center mb-6">
+                  {i + 1}
+                </div>
+                <h3 className="font-semibold text-lg mb-3">{step.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="rounded-3xl bg-primary px-10 py-16 md:py-20 text-white text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Ready to grow your church community?
+            </h2>
+            <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto">
+              Join church leaders using MultipliChurch to build stronger, more
+              connected communities.
+            </p>
+            <Link to="/register">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="h-12 px-10 text-base font-semibold gap-2"
+              >
+                Create your free account
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div className="flex flex-wrap gap-6 justify-center mt-10 text-white/70 text-sm">
+              {[
+                "No credit card required",
+                "Free to use",
+                "Secure & private",
+              ].map((item) => (
+                <span key={item} className="flex items-center gap-1.5">
+                  <Check className="h-4 w-4 text-white/90" />
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="font-bold mb-4">Boilerplate</h3>
-              <p className="text-sm text-muted-foreground">
-                The fastest way to build production-ready SaaS applications.
+      <footer className="border-t bg-muted/20">
+        <div className="max-w-7xl mx-auto px-6 py-16">
+          <div className="grid gap-10 md:grid-cols-4">
+            <div className="md:col-span-1 space-y-4">
+              <Link to="/" className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                  <Building2 className="h-4 w-4 text-white" />
+                </div>
+                <span className="font-bold text-lg">MultipliChurch</span>
+              </Link>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                The all-in-one platform for church community management.
               </p>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h4 className="font-semibold text-sm mb-5">Product</h4>
+              <ul className="space-y-3 text-sm text-muted-foreground">
                 <li>
-                  <Link to="/features" className="hover:text-foreground">
+                  <a
+                    href="#features"
+                    className="hover:text-foreground transition-colors"
+                  >
                     Features
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/pricing" className="hover:text-foreground">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-foreground">
-                    Documentation
                   </a>
+                </li>
+                <li>
+                  <a
+                    href="#how-it-works"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    How it works
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    to="/register"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Get started
+                  </Link>
                 </li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h4 className="font-semibold text-sm mb-5">Account</h4>
+              <ul className="space-y-3 text-sm text-muted-foreground">
                 <li>
-                  <Link to="/about" className="hover:text-foreground">
-                    About
+                  <Link
+                    to="/login"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Sign in
                   </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="hover:text-foreground">
-                    Contact
+                  <Link
+                    to="/register"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Create account
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-foreground">
-                    Blog
-                  </a>
+                  <Link
+                    to="/forgot-password"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Forgot password
+                  </Link>
                 </li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h4 className="font-semibold text-sm mb-5">Platform</h4>
+              <ul className="space-y-3 text-sm text-muted-foreground">
                 <li>
-                  <a href="#" className="hover:text-foreground">
-                    Privacy Policy
-                  </a>
+                  <Link
+                    to="/admin/login"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Admin portal
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-foreground">
-                    Terms of Service
-                  </a>
+                  <Link
+                    to="/dashboard"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Dashboard
+                  </Link>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Boilerplate. All rights reserved.
+
+          <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+            <p>
+              © {new Date().getFullYear()} MultipliChurch. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              <span className="hover:text-foreground cursor-pointer transition-colors">
+                Privacy Policy
+              </span>
+              <span className="hover:text-foreground cursor-pointer transition-colors">
+                Terms of Service
+              </span>
+            </div>
           </div>
         </div>
       </footer>

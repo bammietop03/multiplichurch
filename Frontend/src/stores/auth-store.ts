@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { User, UserOrganization } from "@/types";
+import type { User, UserChurch } from "@/types";
 
 interface AuthState {
   user: User | null;
   accessToken: string | null;
-  activeOrganizationId: string | null;
-  userOrganizations: UserOrganization[];
+  activeChurchId: string | null;
+  userChurches: UserChurch[];
   isAuthenticated: boolean;
   isLoading: boolean;
   isInitialized: boolean;
@@ -15,18 +15,15 @@ interface AuthState {
 interface AuthActions {
   setUser: (user: User | null) => void;
   setAccessToken: (token: string | null) => void;
-  setActiveOrganization: (orgId: string | null) => void;
-  setUserOrganizations: (orgs: UserOrganization[]) => void;
-  login: (
-    user: User,
-    accessToken: string,
-    organizations?: UserOrganization[]
-  ) => void;
+  setActiveChurch: (churchId: string | null) => void;
+  setUserChurches: (churches: UserChurch[]) => void;
+  login: (user: User, accessToken: string, churches?: UserChurch[]) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
   setInitialized: (initialized: boolean) => void;
   hasRole: (roleName: string) => boolean;
   isAdmin: () => boolean;
+  isChurchAdmin: (churchId?: string | null) => boolean;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>()(
@@ -35,8 +32,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       // State
       user: null,
       accessToken: null,
-      activeOrganizationId: null,
-      userOrganizations: [],
+      activeChurchId: null,
+      userChurches: [],
       isAuthenticated: false,
       isLoading: true,
       isInitialized: false,
@@ -46,35 +43,39 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         set({
           user,
           isAuthenticated: !!user,
-          userOrganizations: user?.organizations || [],
+          userChurches: user?.churches || [],
         }),
 
       setAccessToken: (accessToken) => set({ accessToken }),
 
-      setActiveOrganization: (activeOrganizationId) =>
-        set({ activeOrganizationId }),
+      setActiveChurch: (activeChurchId) => set({ activeChurchId }),
 
-      setUserOrganizations: (userOrganizations) => set({ userOrganizations }),
+      setUserChurches: (userChurches) => set({ userChurches }),
 
-      login: (user, accessToken, organizations = []) =>
+      login: (user, accessToken, churches = []) => {
+        const userChurches =
+          churches.length > 0 ? churches : user?.churches || [];
         set({
           user,
           accessToken,
-          userOrganizations:
-            organizations.length > 0
-              ? organizations
-              : user?.organizations || [],
+          userChurches,
+          // Auto-set activeChurchId if not already stored
+          activeChurchId:
+            useAuthStore.getState().activeChurchId ??
+            userChurches[0]?.id ??
+            null,
           isAuthenticated: true,
           isLoading: false,
           isInitialized: true,
-        }),
+        });
+      },
 
       logout: () =>
         set({
           user: null,
           accessToken: null,
-          activeOrganizationId: null,
-          userOrganizations: [],
+          activeChurchId: null,
+          userChurches: [],
           isAuthenticated: false,
           isLoading: false,
           isInitialized: true,
@@ -86,14 +87,23 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       hasRole: (roleName: string) => {
         const { user } = get();
-        if (!user?.role) return false;
-        return user.role.name === roleName;
+        if (!user) return false;
+        return user.userRole === roleName;
       },
 
       isAdmin: () => {
         const { user } = get();
-        if (!user?.role) return false;
-        return user.role.name === "Admin" || user.role.name === "Super Admin";
+        if (!user) return false;
+        return user.userRole === "SUPER_ADMIN";
+      },
+
+      isChurchAdmin: (churchId?: string | null) => {
+        const { user, activeChurchId, userChurches } = get();
+        if (!user) return false;
+        if (user.userRole === "SUPER_ADMIN") return true;
+        const id = churchId ?? activeChurchId;
+        const church = userChurches.find((c) => c.id === id);
+        return church?.role === "ADMIN";
       },
     }),
     {
@@ -102,8 +112,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       partialize: (state) => ({
         user: state.user,
         accessToken: state.accessToken,
-        activeOrganizationId: state.activeOrganizationId,
-        userOrganizations: state.userOrganizations,
+        activeChurchId: state.activeChurchId,
+        userChurches: state.userChurches,
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
@@ -113,6 +123,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           state.setLoading(false);
         }
       },
-    }
-  )
+    },
+  ),
 );

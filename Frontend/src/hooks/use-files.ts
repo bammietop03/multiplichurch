@@ -18,7 +18,7 @@ export function useFiles(page = 1, limit = 20) {
         "/files",
         {
           params: { page, limit },
-        }
+        },
       );
       return data;
     },
@@ -46,16 +46,13 @@ export function useUploadFile() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const { data } = await apiClient.post<FileUpload>(
-        "/files/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      return data;
+      const { data } = await apiClient.post("/files/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      // Unwrap the response interceptor envelope
+      return (data.data ?? data) as FileUpload;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: fileKeys.list() });
@@ -83,7 +80,7 @@ export function useFileDownloadUrl(id: string) {
     queryKey: [...fileKeys.detail(id), "download"],
     queryFn: async () => {
       const { data } = await apiClient.get<{ url: string }>(
-        `/files/${id}/download`
+        `/files/${id}/download`,
       );
       return data.url;
     },

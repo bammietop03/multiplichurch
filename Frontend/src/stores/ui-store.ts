@@ -21,7 +21,7 @@ export const useUIStore = create<UIState & UIActions>()(
   persist(
     (set) => ({
       // State
-      theme: "system",
+      theme: "light",
       sidebarOpen: true,
       sidebarCollapsed: false,
 
@@ -53,23 +53,14 @@ export const useUIStore = create<UIState & UIActions>()(
           applyTheme(state.theme);
         }
       },
-    }
-  )
+    },
+  ),
 );
 
-export function applyTheme(theme: Theme) {
+export function applyTheme(_theme?: Theme) {
   const root = window.document.documentElement;
   root.classList.remove("light", "dark");
-
-  if (theme === "system") {
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-      .matches
-      ? "dark"
-      : "light";
-    root.classList.add(systemTheme);
-  } else {
-    root.classList.add(theme);
-  }
+  root.classList.add("light");
 }
 
 // Initialize theme on load

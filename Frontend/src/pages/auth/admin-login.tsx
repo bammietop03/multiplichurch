@@ -43,15 +43,11 @@ export default function AdminLoginPage() {
       const result = await login.mutateAsync(data);
 
       console.log("Login result:", result);
-      console.log("User role:", result.user?.role);
+      console.log("User role:", result.user?.userRole);
 
       // Check if user has admin role
-      const userRole = result.user?.role;
-      const hasAdminRole =
-        userRole?.name === "Admin" ||
-        userRole?.name === "Super Admin" ||
-        userRole?.name === "admin" ||
-        userRole?.name === "super_admin";
+      const userRole = result.user?.userRole;
+      const hasAdminRole = userRole === "SUPER_ADMIN";
 
       console.log("Has admin role:", hasAdminRole);
 
@@ -71,31 +67,31 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4">
-      {/* Background pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMyMDIwMjAiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTZ2LTRoLTJ2NGgyem0tNiA2aC00di0yaDR2MnptMC02di00aC00djRoNHptLTYgNmgtNHYtMmg0djJ6bTAtNnYtNGgtNHY0aDR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+    <div className="min-h-screen flex items-center justify-center bg-primary px-4">
+      {/* Subtle pattern overlay */}
+      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] bg-[length:24px_24px]"></div>
 
       <div className="relative w-full max-w-md">
         {/* Back to home link */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </Link>
 
-        <Card className="border-slate-700 bg-slate-800/50 backdrop-blur-sm shadow-2xl">
+        <Card className="border-white/20 bg-white/10 backdrop-blur-sm shadow-2xl text-white">
           <CardHeader className="space-y-4 pb-4">
             {/* Admin icon */}
-            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+            <div className="mx-auto w-16 h-16 rounded-full bg-white/20 flex items-center justify-center shadow-lg">
               <Shield className="h-8 w-8 text-white" />
             </div>
             <div className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center text-white">
                 Admin Portal
               </CardTitle>
-              <CardDescription className="text-center text-slate-400">
+              <CardDescription className="text-center text-white/70">
                 Secure access for administrators only
               </CardDescription>
             </div>
@@ -104,7 +100,7 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300">
+                <Label htmlFor="email" className="text-white/90">
                   Email Address
                 </Label>
                 <Input
@@ -112,16 +108,16 @@ export default function AdminLoginPage() {
                   type="email"
                   placeholder="admin@example.com"
                   autoComplete="email"
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white focus:ring-white"
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-400">{errors.email.message}</p>
+                  <p className="text-sm text-red-300">{errors.email.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-slate-300">
+                <Label htmlFor="password" className="text-white/90">
                   Password
                 </Label>
                 <div className="relative">
@@ -129,21 +125,21 @@ export default function AdminLoginPage() {
                     id="password"
                     type="password"
                     autoComplete="current-password"
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500 pr-10"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white focus:ring-white pr-10"
                     {...register("password")}
                   />
-                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-red-400">
+                  <p className="text-sm text-red-300">
                     {errors.password.message}
                   </p>
                 )}
               </div>
 
               {/* Security notice */}
-              <div className="rounded-lg bg-slate-700/30 border border-slate-600/50 p-3">
-                <p className="text-xs text-slate-400 text-center">
+              <div className="rounded-lg bg-white/10 border border-white/20 p-3">
+                <p className="text-xs text-white/60 text-center">
                   🔒 This is a secure area. All login attempts are logged and
                   monitored.
                 </p>
@@ -153,7 +149,7 @@ export default function AdminLoginPage() {
             <CardFooter className="flex flex-col space-y-4 pt-2">
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg"
+                className="w-full bg-white text-primary hover:bg-white/90 font-medium shadow-lg"
                 disabled={login.isPending}
               >
                 {login.isPending ? (
@@ -172,14 +168,14 @@ export default function AdminLoginPage() {
               <div className="flex items-center justify-center gap-4 text-sm">
                 <Link
                   to="/forgot-password"
-                  className="text-slate-400 hover:text-blue-400 transition-colors"
+                  className="text-white/70 hover:text-white transition-colors"
                 >
                   Forgot password?
                 </Link>
-                <span className="text-slate-600">•</span>
+                <span className="text-white/30">•</span>
                 <Link
                   to="/login"
-                  className="text-slate-400 hover:text-blue-400 transition-colors"
+                  className="text-white/70 hover:text-white transition-colors"
                 >
                   User Login
                 </Link>
@@ -189,7 +185,7 @@ export default function AdminLoginPage() {
         </Card>
 
         {/* Footer */}
-        <p className="text-center text-slate-500 text-xs mt-6">
+        <p className="text-center text-white/50 text-xs mt-6">
           Protected by enterprise-grade security
         </p>
       </div>

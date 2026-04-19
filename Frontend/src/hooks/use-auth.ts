@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import apiClient from "@/lib/api-client";
 import { useAuthStore } from "@/stores/auth-store";
 import type {
@@ -23,7 +24,7 @@ export const authKeys = {
 export function useCurrentUser() {
   const { isAuthenticated, setUser, setLoading, logout } = useAuthStore();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: authKeys.me(),
     queryFn: async () => {
       const { data } = await apiClient.get<ApiResponse<User>>("/auth/me");
@@ -32,16 +33,22 @@ export function useCurrentUser() {
     enabled: isAuthenticated,
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    meta: {
-      onSuccess: (data: User) => {
-        setUser(data);
-        setLoading(false);
-      },
-      onError: () => {
-        logout();
-      },
-    },
   });
+
+  useEffect(() => {
+    if (query.data) {
+      setUser(query.data);
+      setLoading(false);
+    }
+  }, [query.data, setUser, setLoading]);
+
+  useEffect(() => {
+    if (query.isError) {
+      logout();
+    }
+  }, [query.isError, logout]);
+
+  return query;
 }
 
 // Login mutation
@@ -53,7 +60,7 @@ export function useLogin() {
     mutationFn: async (credentials: LoginRequest) => {
       const { data } = await apiClient.post<ApiResponse<AuthResponse>>(
         "/auth/login",
-        credentials
+        credentials,
       );
       return data.data; // Extract from wrapper
     },
@@ -73,7 +80,7 @@ export function useRegister() {
     mutationFn: async (userData: RegisterRequest) => {
       const { data } = await apiClient.post<ApiResponse<AuthResponse>>(
         "/auth/register",
-        userData
+        userData,
       );
       return data.data; // Extract from wrapper
     },

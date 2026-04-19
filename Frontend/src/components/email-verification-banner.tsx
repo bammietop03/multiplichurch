@@ -22,7 +22,7 @@ export function EmailVerificationBanner() {
     try {
       await apiClient.post("/auth/resend-verification", { email: user.email });
       toast.success("Verification code sent! Check your email.");
-    } catch (error) {
+    } catch {
       toast.error("Failed to send verification code");
     } finally {
       setIsResending(false);

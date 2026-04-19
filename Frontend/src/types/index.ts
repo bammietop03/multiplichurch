@@ -1,3 +1,8 @@
+// Enums
+export type UserRole = "SUPER_ADMIN" | "USER";
+export type ChurchRole = "ADMIN" | "MEMBER";
+export type InviteStatus = "PENDING" | "ACCEPTED" | "EXPIRED";
+
 // User types
 export interface User {
   id: string;
@@ -12,28 +17,22 @@ export interface User {
   lastLoginIp?: string;
   createdAt: string;
   updatedAt: string;
-  role?: Role | null;
-  organizations?: UserOrganization[];
+  userRole: UserRole;
+  churches?: UserChurch[];
 }
 
-export interface UserOrganization {
+export interface UserChurch {
   id: string;
   name: string;
   slug: string;
   logo?: string;
   isActive: boolean;
   membershipId: string;
-  role: string;
+  role: ChurchRole;
 }
 
-export interface Role {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-// Organization types
-export interface Organization {
+// Church types
+export interface Church {
   id: string;
   name: string;
   slug: string;
@@ -44,15 +43,34 @@ export interface Organization {
   updatedAt: string;
 }
 
-export interface OrganizationMember {
+export interface ChurchMember {
   id: string;
-  organizationId: string;
+  churchId: string;
   userId: string;
-  roleId: string;
-  role: Role;
+  role: ChurchRole;
   joinedAt: string;
   user?: User;
-  organization?: Organization;
+  church?: Church;
+}
+
+export interface ChurchInvite {
+  id: string;
+  churchId: string;
+  email: string;
+  role: ChurchRole;
+  token: string;
+  status: InviteStatus;
+  invitedBy?: string;
+  expiresAt: string;
+  createdAt: string;
+  church?: Church;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  totalChurches: number;
+  totalMembers: number;
+  verifiedUsers: number;
 }
 
 // Auth types
@@ -105,91 +123,9 @@ export interface VerifyEmailRequest {
   code: string;
 }
 
-// Payment types
-export type PaymentProvider = "PAYSTACK" | "STRIPE" | "FLUTTERWAVE";
-export type PaymentStatus =
-  | "PENDING"
-  | "PROCESSING"
-  | "SUCCESS"
-  | "FAILED"
-  | "CANCELLED"
-  | "REFUNDED";
+// Payment types removed
 
-export interface Payment {
-  id: string;
-  userId: string;
-  organizationId?: string;
-  provider: PaymentProvider;
-  providerRef?: string;
-  amount: number;
-  currency: string;
-  status: PaymentStatus;
-  description?: string;
-  metadata?: Record<string, unknown>;
-  paidAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface InitializePaymentRequest {
-  amount: number;
-  currency: string;
-  email: string;
-  provider: PaymentProvider;
-  description?: string;
-  metadata?: Record<string, unknown>;
-  callbackUrl?: string;
-}
-
-export interface InitializePaymentResponse {
-  reference: string;
-  authorizationUrl: string;
-  accessCode?: string;
-}
-
-// Subscription types
-export type SubscriptionStatus =
-  | "ACTIVE"
-  | "CANCELLED"
-  | "PAST_DUE"
-  | "TRIALING"
-  | "EXPIRED";
-export type SubscriptionInterval =
-  | "DAILY"
-  | "WEEKLY"
-  | "MONTHLY"
-  | "QUARTERLY"
-  | "YEARLY";
-
-export interface SubscriptionPlan {
-  id: string;
-  name: string;
-  description?: string;
-  amount: number;
-  currency: string;
-  interval: SubscriptionInterval;
-  trialDays?: number;
-  features?: Record<string, unknown>;
-  isActive: boolean;
-}
-
-export interface Subscription {
-  id: string;
-  userId: string;
-  organizationId?: string;
-  planId: string;
-  plan?: SubscriptionPlan;
-  provider: PaymentProvider;
-  status: SubscriptionStatus;
-  interval: SubscriptionInterval;
-  amount: number;
-  currency: string;
-  currentPeriodStart: string;
-  currentPeriodEnd: string;
-  trialStart?: string;
-  trialEnd?: string;
-  cancelAtPeriodEnd: boolean;
-}
+// Subscription types removed
 
 // File types
 export interface FileUpload {
@@ -237,99 +173,4 @@ export interface AuditLog {
   ipAddress?: string;
   userAgent?: string;
   createdAt: string;
-}
-
-// Permission types
-export type PermissionAction =
-  | "CREATE"
-  | "READ"
-  | "UPDATE"
-  | "DELETE"
-  | "MANAGE";
-export type PermissionResource =
-  | "USER"
-  | "ORGANIZATION"
-  | "PAYMENT"
-  | "AUDIT_LOG"
-  | "FILE"
-  | "API_KEY"
-  | "ALL";
-
-export interface Permission {
-  id: string;
-  action: PermissionAction;
-  resource: PermissionResource;
-  description?: string;
-  rolesCount?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Role types (extended)
-export interface RoleWithPermissions extends Role {
-  permissions: Permission[];
-  usersCount: number;
-  isSystem: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UserRoleAssignment {
-  id: string;
-  userId: string;
-  roleId: string;
-  user: {
-    id: string;
-    email: string;
-    firstName?: string;
-    lastName?: string;
-    avatar?: string;
-    status?: string;
-  };
-  role: {
-    id: string;
-    name: string;
-    description?: string;
-  };
-  createdAt: string;
-}
-
-export interface RolesStatistics {
-  totalRoles: number;
-  systemRoles: number;
-  customRoles: number;
-  totalPermissions: number;
-  totalUserRoles: number;
-  topRoles: Array<{
-    id: string;
-    name: string;
-    usersCount: number;
-  }>;
-}
-
-// Create/Update DTOs
-export interface CreateRoleRequest {
-  name: string;
-  description?: string;
-  permissionIds?: string[];
-}
-
-export interface UpdateRoleRequest {
-  name?: string;
-  description?: string;
-}
-
-export interface AssignPermissionsRequest {
-  permissionIds: string[];
-}
-
-export interface CreatePermissionRequest {
-  action: PermissionAction;
-  resource: PermissionResource;
-  description?: string;
-}
-
-export interface AssignRoleToUserRequest {
-  userId: string;
-  roleId: string;
 }

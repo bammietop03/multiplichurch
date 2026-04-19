@@ -7,16 +7,8 @@ import { useResetPassword } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { CheckCircle, ArrowLeft } from "lucide-react";
+import { CheckCircle, ArrowLeft, Building2, Lock } from "lucide-react";
 
 const resetPasswordSchema = z
   .object({
@@ -28,7 +20,7 @@ const resetPasswordSchema = z
       .regex(/[0-9]/, "Password must contain at least one number")
       .regex(
         /[^A-Za-z0-9]/,
-        "Password must contain at least one special character"
+        "Password must contain at least one special character",
       ),
     confirmPassword: z.string(),
   })
@@ -70,78 +62,130 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center text-destructive">
-              Invalid Reset Link
-            </CardTitle>
-            <CardDescription className="text-center">
-              The password reset link is invalid or has expired. Please request
-              a new one.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Link to="/forgot-password" className="w-full">
-              <Button className="w-full">Request new link</Button>
-            </Link>
-          </CardFooter>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-white px-6">
+        <div className="w-full max-w-md text-center space-y-5">
+          <h1 className="text-2xl font-bold text-destructive">
+            Invalid Reset Link
+          </h1>
+          <p className="text-muted-foreground">
+            The password reset link is invalid or has expired. Please request a
+            new one.
+          </p>
+          <Link to="/forgot-password">
+            <Button className="w-full h-11">Request new link</Button>
+          </Link>
+        </div>
       </div>
     );
   }
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+      <div className="min-h-screen flex">
+        <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-primary p-12 text-white">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
+              <Building2 className="h-5 w-5 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-center">
-              Password reset successful
-            </CardTitle>
-            <CardDescription className="text-center">
-              Your password has been successfully reset. You can now sign in
-              with your new password.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Button className="w-full" onClick={() => navigate("/login")}>
+            <span className="font-bold text-xl">MultipliChurch</span>
+          </Link>
+          <div className="space-y-4">
+            <div className="h-16 w-16 rounded-2xl bg-white/20 flex items-center justify-center">
+              <CheckCircle className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold">Password updated</h2>
+            <p className="text-white/75 text-lg leading-relaxed">
+              Your password has been reset. You can now sign in with your new
+              password.
+            </p>
+          </div>
+          <p className="text-white/50 text-sm">
+            © {new Date().getFullYear()} MultipliChurch. All rights reserved.
+          </p>
+        </div>
+        <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
+          <div className="w-full max-w-md space-y-7 text-center">
+            <div className="mx-auto h-14 w-14 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle className="h-7 w-7 text-green-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Password reset successful</h1>
+              <p className="text-muted-foreground mt-2">
+                Your password has been updated. You can now sign in.
+              </p>
+            </div>
+            <Button
+              className="w-full h-11 text-base"
+              onClick={() => navigate("/login")}
+            >
               Continue to sign in
             </Button>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Reset your password
-          </CardTitle>
-          <CardDescription className="text-center">
-            Enter your new password below
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
-            {resetPassword.isError && (
-              <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
-                {(resetPassword.error as Error)?.message ||
-                  "Failed to reset password. The link may have expired."}
-              </div>
-            )}
-            <div className="space-y-2">
+    <div className="min-h-screen flex">
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-primary p-12 text-white">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <Building2 className="h-5 w-5 text-white" />
+          </div>
+          <span className="font-bold text-xl">MultipliChurch</span>
+        </Link>
+        <div className="space-y-8">
+          <div>
+            <div className="h-14 w-14 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
+              <Lock className="h-7 w-7 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold leading-tight mb-3">
+              Create a new password
+            </h2>
+            <p className="text-white/75 text-lg leading-relaxed">
+              Choose a strong password to keep your account secure.
+            </p>
+          </div>
+        </div>
+        <p className="text-white/50 text-sm">
+          © {new Date().getFullYear()} MultipliChurch. All rights reserved.
+        </p>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
+        <div className="w-full max-w-md space-y-7">
+          <Link to="/" className="flex lg:hidden items-center gap-2.5 mb-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-bold text-lg">MultipliChurch</span>
+          </Link>
+
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Reset your password
+            </h1>
+            <p className="text-muted-foreground mt-1.5">
+              Enter your new password below
+            </p>
+          </div>
+
+          {resetPassword.isError && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg">
+              {(resetPassword.error as Error)?.message ||
+                "Failed to reset password. The link may have expired."}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
               <Label htmlFor="newPassword">New password</Label>
               <Input
                 id="newPassword"
                 type="password"
                 autoComplete="new-password"
+                className="h-11"
                 {...register("newPassword")}
               />
               {errors.newPassword && (
@@ -150,12 +194,13 @@ export default function ResetPasswordPage() {
                 </p>
               )}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="confirmPassword">Confirm new password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 autoComplete="new-password"
+                className="h-11"
                 {...register("confirmPassword")}
               />
               {errors.confirmPassword && (
@@ -164,11 +209,9 @@ export default function ResetPasswordPage() {
                 </p>
               )}
             </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-11 text-base"
               disabled={resetPassword.isPending}
             >
               {resetPassword.isPending ? (
@@ -180,16 +223,17 @@ export default function ResetPasswordPage() {
                 "Reset password"
               )}
             </Button>
-            <Link
-              to="/login"
-              className="text-sm text-center text-muted-foreground hover:text-primary"
-            >
-              <ArrowLeft className="inline mr-1 h-4 w-4" />
-              Back to login
-            </Link>
-          </CardFooter>
-        </form>
-      </Card>
+          </form>
+
+          <Link
+            to="/login"
+            className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to sign in
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

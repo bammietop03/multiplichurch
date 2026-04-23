@@ -43,6 +43,14 @@ export class RolesGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
+    // If the user's global role already satisfies the requirement, allow through
+    // immediately. This prevents a SUPER_ADMIN (or any global role) from being
+    // denied when the client sends an x-church-id header that would otherwise
+    // force a church-scoped membership check.
+    if (user.userRole && requiredRoles.includes(user.userRole)) {
+      return true;
+    }
+
     const churchId = skipChurchCheck
       ? null
       : request.churchId ||
